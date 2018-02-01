@@ -24,7 +24,6 @@ def collide_with_walls(sprite, group, direction):
                sprite.vel.y = 0
                sprite.hit_rect.centery = sprite.pos.y
 
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.allSprites
@@ -43,7 +42,7 @@ class Player(pygame.sprite.Sprite):
     def getKeys(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
-            self.acc = vec(200, 0).rotate(-self.rot)
+            self.acc = vec(setting.PLAYERSPEED, 0).rotate(-self.rot)
 
     def update(self):
         self.acc = (0, 0)
@@ -69,9 +68,9 @@ class Player(pygame.sprite.Sprite):
         #self.image = pygame.transform.rotate(self.currentImg, self.rot)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos      
-        self.acc += self.vel * -2 #friction
+        self.acc += self.vel * setting.PLAYERFRICTION #friction
         self.vel += self.acc * self.game.dt
-        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+        self.pos += self.vel * self.game.dt + setting.PLAYERINITIALACC * self.acc * self.game.dt ** 2
 
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.collisionSprites, "x")      
@@ -90,7 +89,6 @@ class Obstacle(pygame.sprite.Sprite):
         self.y = y
         self.rect.x = x
         self.rect.y = y
-
 
 class Panner(pygame.sprite.Sprite):
     def __init__(self, game, x, y):

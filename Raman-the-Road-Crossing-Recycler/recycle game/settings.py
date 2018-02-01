@@ -4,6 +4,7 @@ pygame.init()
 WIDTH = 768
 HEIGHT = 832
 FPS = 60
+FONT = "ARCADECLASSIC.TTF"
 
 # Colours
 WHITE = (255, 255, 255)
@@ -18,8 +19,17 @@ DARKGREEN = (0, 102, 0)
 BROWN = (106, 55, 5)
 NIGHT_COLOR = (20, 20, 20)
 
-
+# Player settings
 PLAYERIMG = "player.png"
 PLAYERROTATE = "player2.png"
 PLAYERROTATE1 = "player4.png"
 PLAYERFLIP = "player3.png"
+
+# Values
+PLAYERSPEED = 200
+PLAYERFRICTION = -2
+PLAYERINITIALACC = 0.5
+
+
+# Panner
+PANSPEED = 0.12

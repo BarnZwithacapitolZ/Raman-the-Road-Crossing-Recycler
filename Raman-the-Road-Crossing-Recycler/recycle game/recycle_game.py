@@ -27,6 +27,8 @@ class Game:
         dataFolder = path.join(gameFolder, "data")
         mapFolder = path.join(dataFolder, "maps")
         imgFolder = path.join(dataFolder, "images")
+        fontFoler = path.join(dataFolder, "fonts")
+        self.font = path.join(fontFoler, setting.FONT)
         self.map = maps.TiledMap(path.join(mapFolder, "map.tmx"))
         self.mapImg = self.map.make_map()
         self.mapRect = self.mapImg.get_rect()
@@ -55,19 +57,18 @@ class Game:
         self.camera = maps.Camera(self.map.width, self.map.height)
         self.run()
 
-    def panCamera(self):  
+    def panCamera(self, speed):  
         self.panner = sprite.Panner(self, setting.WIDTH / 2, 0)
         y = setting.HEIGHT / 2
         while y < self.map.height - (setting.HEIGHT / 2):
             self.panner.rect.y = y
-            self.camera.update(self.panner)
-            self.draw()
-            print(self.panner.rect.y)
-            y += 0.18
+            self.camera.update(self.panner)         
+            self.draw(True)        
+            y += speed
 
     def run(self):
         self.playing = True
-        self.panCamera()
+        self.panCamera(setting.PANSPEED)
         while self.playing:
            self.dt = self.clock.tick(setting.FPS) / 1000
            self.keyEvents()
@@ -95,10 +96,12 @@ class Game:
         text_rect.y = y
         self.gameDisplay.blit(text_surface, text_rect)
 
-    def draw(self):
+    def draw(self, level = False):
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
+        if level:
+            self.render_message(self.font, "LEVEL 1", 90, setting.WHITE, 250, setting.HEIGHT / 2)
         pygame.display.update()
 
 if __name__ == "__main__":
