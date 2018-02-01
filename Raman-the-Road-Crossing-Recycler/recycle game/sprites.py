@@ -38,6 +38,8 @@ class Player(pygame.sprite.Sprite):
         self.acc = vec(0, 0)
         self.rect.center = self.pos
         self.rot = 0
+        self.lives = game.lives
+        self.litter = 0
 
     def getKeys(self):
         keys = pygame.key.get_pressed()
@@ -65,10 +67,9 @@ class Player(pygame.sprite.Sprite):
         else:
             self.image = self.game.playerRotate
     
-        #self.image = pygame.transform.rotate(self.currentImg, self.rot)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos      
-        self.acc += self.vel * setting.PLAYERFRICTION #friction
+        self.acc += self.vel * setting.PLAYERFRICTION 
         self.vel += self.acc * self.game.dt
         self.pos += self.vel * self.game.dt + setting.PLAYERINITIALACC * self.acc * self.game.dt ** 2
 
@@ -77,7 +78,6 @@ class Player(pygame.sprite.Sprite):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.collisionSprites, "y")
         self.rect.center = self.hit_rect.center
-        print(self.rot)
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, game, x, y, w, h):

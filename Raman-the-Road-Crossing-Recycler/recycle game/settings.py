@@ -4,7 +4,8 @@ pygame.init()
 WIDTH = 768
 HEIGHT = 832
 FPS = 60
-FONT = "ARCADECLASSIC.TTF"
+FONT = "joystix monospace.ttf"
+DEFAULTLEVEL = 1
 
 # Colours
 WHITE = (255, 255, 255)
@@ -29,7 +30,7 @@ PLAYERFLIP = "player3.png"
 PLAYERSPEED = 200
 PLAYERFRICTION = -2
 PLAYERINITIALACC = 0.5
-
+PLAYERLIVES = 3
 
 # Panner
 PANSPEED = 0.12

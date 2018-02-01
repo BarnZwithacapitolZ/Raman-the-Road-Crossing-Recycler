@@ -40,6 +40,9 @@ class Game:
         self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
         self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
         self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
+        self.level = setting.DEFAULTLEVEL    
+        self.lives = setting.PLAYERLIVES
+        self.litter = 3
 
     def getMap(self):
         pass
@@ -48,6 +51,7 @@ class Game:
         pass
 
     def load(self):
+        self.timer = 30
         self.allSprites = pygame.sprite.Group()
         self.litterSprites = pygame.sprite.Group()
         self.collisionSprites = pygame.sprite.Group()
@@ -70,6 +74,8 @@ class Game:
             self.keyEvents()
             self.draw(True)        
             y += speed
+        elapse = self.clock.tick(setting.FPS) / 1000
+        return 
 
     def run(self):
         self.playing = True
@@ -84,6 +90,15 @@ class Game:
         # When not panning down
         self.allSprites.update()
         self.camera.update(self.player)
+        now = pygame.time.get_ticks()
+        self.timer -= self.dt
+
+        if self.timer < 0:
+            self.lives -= 1
+            self.load()
+
+        if self.lives < 1:
+            print("GAME OVER")
 
     def keyEvents(self):
         for e in pygame.event.get():
@@ -91,6 +106,7 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
+
 
     def render_message(self, font, text, size, colour, x, y):
         ####render a message to the screen####
@@ -106,7 +122,12 @@ class Game:
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
         if level:
-            self.render_message(self.font, "LEVEL 1", 90, setting.WHITE, 250, setting.HEIGHT / 2)
+            self.render_message(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 200, setting.HEIGHT / 2 - 30)
+        else:
+            percent = (self.player.litter / self.litter) * 100
+            self.render_message(self.font, "LITTER " + str(round(percent, 0))[:-2] + u"%", 30, setting.WHITE, 40, 40)
+            self.render_message(self.font, "LIVES " + str(self.player.lives), 30, setting.WHITE, 320, 40)
+            self.render_message(self.font, "TIME " + str(round(self.timer, 0))[:-2], 30, setting.WHITE, 540, 40)
         pygame.display.update()
 
 if __name__ == "__main__":
