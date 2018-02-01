@@ -1,41 +1,45 @@
 import pygame
 import sys
-from os import path
+import os
 import settings as setting
 import mapConfig as maps
 import sprites as sprite
 
 def getFilePath():
     if getattr(sys, 'frozen', False):
-        return path.dirname(sys.executable)
+        return os.path.dirname(sys.executable)
     else:
-        return path.dirname(__file__)
+        return os.path.dirname(__file__)
 
 class Game:
     def __init__(self):
         pygame.mixer.pre_init(44100,  -16, 1, 2048)
         pygame.mixer.set_num_channels(10)
         pygame.key.set_repeat(500, 100)
+        infoObject = pygame.display.Info()
+        self.modes = [infoObject.current_w, infoObject.current_h] 
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (self.modes[0] / 2 - (setting.WIDTH / 2), 
+                                                            self.modes[1] / 2 - (setting.HEIGHT / 2))
         self.gameDisplay = pygame.display.set_mode((setting.WIDTH, setting.HEIGHT))
         self.clock = pygame.time.Clock()
         self.running = True
-        pygame.key.set_repeat(500, 100)
+        pygame.key.set_repeat(500, 100)      
         self.loadData()
 
     def loadData(self):
         gameFolder = getFilePath()
-        dataFolder = path.join(gameFolder, "data")
-        mapFolder = path.join(dataFolder, "maps")
-        imgFolder = path.join(dataFolder, "images")
-        fontFoler = path.join(dataFolder, "fonts")
-        self.font = path.join(fontFoler, setting.FONT)
-        self.map = maps.TiledMap(path.join(mapFolder, "map.tmx"))
+        dataFolder = os.path.join(gameFolder, "data")
+        mapFolder = os.path.join(dataFolder, "maps")
+        imgFolder = os.path.join(dataFolder, "images")
+        fontFoler = os.path.join(dataFolder, "fonts")
+        self.font = os.path.join(fontFoler, setting.FONT)
+        self.map = maps.TiledMap(os.path.join(mapFolder, "map.tmx"))
         self.mapImg = self.map.make_map()
         self.mapRect = self.mapImg.get_rect()
-        self.playerImage = pygame.image.load(path.join(imgFolder, setting.PLAYERIMG)).convert_alpha()
-        self.playerRotate = pygame.image.load(path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
-        self.playerFlip = pygame.image.load(path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
-        self.playerRotate1 = pygame.image.load(path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
+        self.playerImage = pygame.image.load(os.path.join(imgFolder, setting.PLAYERIMG)).convert_alpha()
+        self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
+        self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
+        self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
 
     def getMap(self):
         pass
@@ -62,7 +66,8 @@ class Game:
         y = setting.HEIGHT / 2
         while y < self.map.height - (setting.HEIGHT / 2):
             self.panner.rect.y = y
-            self.camera.update(self.panner)         
+            self.camera.update(self.panner)    
+            self.keyEvents()
             self.draw(True)        
             y += speed
 
