@@ -1,4 +1,5 @@
 import pygame
+import random
 import settings as setting
 from mapConfig import collide_hit_rect
 vec = pygame.math.Vector2
@@ -99,3 +100,26 @@ class Panner(pygame.sprite.Sprite):
         self.y = y
         self.rect.x = x
         self.rect.y = y
+
+class Bin(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.collisionSprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.recycleImage
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Litter(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.litterSprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        selection = random.randint(0, len(game.litterImages) - 1)
+        self.image = game.litterImages[selection]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+

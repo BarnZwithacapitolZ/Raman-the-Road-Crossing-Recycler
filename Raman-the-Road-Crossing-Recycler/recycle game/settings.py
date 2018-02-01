@@ -6,6 +6,11 @@ HEIGHT = 832
 FPS = 60
 FONT = "joystix monospace.ttf"
 DEFAULTLEVEL = 1
+RECYCLEBIN = "recycle bin.png"
+TIME = 40
+HEART = "heart.png"
+LITTER = "litter.png"
+LITTER1 = "litter1.png"
 
 # Colours
 WHITE = (255, 255, 255)
@@ -27,7 +32,7 @@ PLAYERROTATE1 = "player4.png"
 PLAYERFLIP = "player3.png"
 
 # Values
-PLAYERSPEED = 200
+PLAYERSPEED = 250
 PLAYERFRICTION = -2
 PLAYERINITIALACC = 0.5
 PLAYERLIVES = 3

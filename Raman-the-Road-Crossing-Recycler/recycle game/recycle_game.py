@@ -40,6 +40,11 @@ class Game:
         self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
         self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
         self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
+        self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
+        self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HEART)).convert_alpha()
+        self.litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
+        self.litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
+        self.litterImages = [self.litterImage, self.litterImage1]
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES
         self.litter = 3
@@ -51,7 +56,7 @@ class Game:
         pass
 
     def load(self):
-        self.timer = 30
+        self.timer = setting.TIME
         self.allSprites = pygame.sprite.Group()
         self.litterSprites = pygame.sprite.Group()
         self.collisionSprites = pygame.sprite.Group()
@@ -61,13 +66,18 @@ class Game:
                 self.player = sprite.Player(self, tileObject.x, tileObject.y)
             if tileObject.name == "Collision":
                 sprite.Obstacle(self, tileObject.x, tileObject.y, tileObject.width, tileObject.height)
-
+            if tileObject.name == "Recycle":
+                self.recycleBin = sprite.Bin(self, tileObject.x, tileObject.y)
+        
+        sprite.Litter(self, 100, 400)
+        sprite.Litter(self, 400, 1000)
+        sprite.Litter(self, 350, 600)
         self.camera = maps.Camera(self.map.width, self.map.height)
         self.run()
 
     def panCamera(self, speed):  
         self.panner = sprite.Panner(self, setting.WIDTH / 2, 0)
-        y = setting.HEIGHT / 2
+        y = setting.HEIGHT / 2 - 10
         while y < self.map.height - (setting.HEIGHT / 2):
             self.panner.rect.y = y
             self.camera.update(self.panner)    
@@ -94,11 +104,25 @@ class Game:
         self.timer -= self.dt
 
         if self.timer < 0:
+            # Run out of time
             self.lives -= 1
             self.load()
 
         if self.lives < 1:
+            # game over
             print("GAME OVER")
+
+        # Completes a level
+        if pygame.sprite.collide_rect(self.player, self.recycleBin):
+            if self.player.litter >= self.litter:
+                self.level += 1
+                self.load()
+   
+        hits = pygame.sprite.spritecollide(self.player, self.litterSprites, False)
+        if hits:
+            self.player.litter += 1
+            self.litterSprites.remove(hits[0])
+            hits[0].kill()
 
     def keyEvents(self):
         for e in pygame.event.get():
@@ -108,7 +132,7 @@ class Game:
                 self.running = False
 
 
-    def render_message(self, font, text, size, colour, x, y):
+    def renderMessage(self, font, text, size, colour, x, y):
         ####render a message to the screen####
         font = pygame.font.Font(font, size)
         text_surface = font.render(text, True, colour)
@@ -117,17 +141,25 @@ class Game:
         text_rect.y = y
         self.gameDisplay.blit(text_surface, text_rect)
 
+    def renderObjectImage(self, k, x, y, img, increment):
+        for i in range(k):
+            self.gameDisplay.blit(img, (x, y))
+            x += increment
+        return x
+
     def draw(self, level = False):
-        self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))
+        self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))        
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
         if level:
-            self.render_message(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 200, setting.HEIGHT / 2 - 30)
-        else:
-            percent = (self.player.litter / self.litter) * 100
-            self.render_message(self.font, "LITTER " + str(round(percent, 0))[:-2] + u"%", 30, setting.WHITE, 40, 40)
-            self.render_message(self.font, "LIVES " + str(self.player.lives), 30, setting.WHITE, 320, 40)
-            self.render_message(self.font, "TIME " + str(round(self.timer, 0))[:-2], 30, setting.WHITE, 540, 40)
+            self.renderMessage(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30)
+        else:                      
+            self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 250, 22)
+            self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
+
+            percent = (self.player.litter / self.litter) * 100     
+            percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImage, -74)
+            self.renderMessage(self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65)
         pygame.display.update()
 
 if __name__ == "__main__":
