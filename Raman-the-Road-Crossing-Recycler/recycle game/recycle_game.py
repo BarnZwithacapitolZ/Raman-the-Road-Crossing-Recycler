@@ -1,6 +1,7 @@
 import pygame
 import sys
 import os
+import random
 import settings as setting
 import mapConfig as maps
 import sprites as sprite
@@ -46,8 +47,7 @@ class Game:
         self.litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
         self.litterImages = [self.litterImage, self.litterImage1]
         self.level = setting.DEFAULTLEVEL    
-        self.lives = setting.PLAYERLIVES
-        self.litter = 3
+        self.lives = setting.PLAYERLIVES        
 
     def getMap(self):
         pass
@@ -55,7 +55,23 @@ class Game:
     def genMap(self):
         pass
 
+    def randomLocations(self, k, offsetX, offsetY, width, height):
+        p = []
+        currentPoint = (0, 0)
+        rows, cols = width / setting.TILESIZE, height / setting.TILESIZE
+        for x in range(k):          
+            while True:
+                posX = random.randint(0, rows - 1) * (width / rows)
+                posY = random.randint(0, cols - 1) * (height / cols)
+                currentPoint = (posX + offsetX, posY + offsetY)
+                if currentPoint not in p:
+                    break
+            p.append(currentPoint)
+            sprite.Litter(self, currentPoint[0], currentPoint[1])
+            self.litter += 1
+
     def load(self):
+        self.litter = 0
         self.timer = setting.TIME
         self.allSprites = pygame.sprite.Group()
         self.litterSprites = pygame.sprite.Group()
@@ -68,10 +84,9 @@ class Game:
                 sprite.Obstacle(self, tileObject.x, tileObject.y, tileObject.width, tileObject.height)
             if tileObject.name == "Recycle":
                 self.recycleBin = sprite.Bin(self, tileObject.x, tileObject.y)
-        
-        sprite.Litter(self, 100, 400)
-        sprite.Litter(self, 400, 1000)
-        sprite.Litter(self, 350, 600)
+            if tileObject.name == "Spawn":
+                self.randomLocations(int(tileObject.type), tileObject.x, tileObject.y, tileObject.width, tileObject.height)
+          
         self.camera = maps.Camera(self.map.width, self.map.height)
         self.run()
 
@@ -154,7 +169,7 @@ class Game:
         if level:
             self.renderMessage(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30)
         else:                      
-            self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 250, 22)
+            self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22)
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
 
             percent = (self.player.litter / self.litter) * 100     

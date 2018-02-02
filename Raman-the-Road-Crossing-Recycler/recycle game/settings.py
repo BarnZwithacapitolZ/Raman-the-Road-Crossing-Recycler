@@ -3,6 +3,7 @@ pygame.init()
 
 WIDTH = 768
 HEIGHT = 832
+TILESIZE = 64
 FPS = 60
 FONT = "joystix monospace.ttf"
 DEFAULTLEVEL = 1
