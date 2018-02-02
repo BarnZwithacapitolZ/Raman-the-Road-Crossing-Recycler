@@ -30,13 +30,10 @@ class Game:
     def loadData(self):
         gameFolder = getFilePath()
         dataFolder = os.path.join(gameFolder, "data")
-        mapFolder = os.path.join(dataFolder, "maps")
+        self.mapFolder = os.path.join(dataFolder, "maps")
         imgFolder = os.path.join(dataFolder, "images")
         fontFoler = os.path.join(dataFolder, "fonts")
-        self.font = os.path.join(fontFoler, setting.FONT)
-        self.map = maps.TiledMap(os.path.join(mapFolder, "map.tmx"))
-        self.mapImg = self.map.make_map()
-        self.mapRect = self.mapImg.get_rect()
+        self.font = os.path.join(fontFoler, setting.FONT)       
         self.playerImage = pygame.image.load(os.path.join(imgFolder, setting.PLAYERIMG)).convert_alpha()
         self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
         self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
@@ -46,24 +43,20 @@ class Game:
         self.litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
         self.litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
         self.litterImages = [self.litterImage, self.litterImage1]
+
+        self.levels = { 1 : "map.tmx", 2 : "map1.tmx", 3 : "map3.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES        
-
-    def getMap(self):
-        pass
-
-    def genMap(self):
-        pass
 
     def randomLocations(self, k, offsetX, offsetY, width, height):
         p = []
         currentPoint = (0, 0)
-        rows, cols = width / setting.TILESIZE, height / setting.TILESIZE
+        rows, cols = width / setting.TILESIZE, height / setting.TILESIZE #find the num of rows, cols in spawn area, to spawn objects to
         for x in range(k):          
             while True:
                 posX = random.randint(0, rows - 1) * (width / rows)
                 posY = random.randint(0, cols - 1) * (height / cols)
-                currentPoint = (posX + offsetX, posY + offsetY)
+                currentPoint = (posX + offsetX, posY + offsetY) #Add offset to account for spawn area location
                 if currentPoint not in p:
                     break
             p.append(currentPoint)
@@ -76,6 +69,10 @@ class Game:
         self.allSprites = pygame.sprite.Group()
         self.litterSprites = pygame.sprite.Group()
         self.collisionSprites = pygame.sprite.Group()
+
+        self.map = maps.TiledMap(os.path.join(self.mapFolder, self.levels[self.level]))
+        self.mapImg = self.map.make_map()
+        self.mapRect = self.mapImg.get_rect()
 
         for tileObject in self.map.tmxdata.objects:
             if tileObject.name == "Player":
@@ -104,7 +101,7 @@ class Game:
 
     def run(self):
         self.playing = True
-        self.panCamera(setting.PANSPEED)
+        self.panCamera(self.map.height / setting.PANSPEED)
         while self.playing:
            self.dt = self.clock.tick(setting.FPS) / 1000
            self.keyEvents()
