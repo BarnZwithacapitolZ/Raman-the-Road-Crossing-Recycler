@@ -10,8 +10,15 @@ DEFAULTLEVEL = 1
 RECYCLEBIN = "recycle bin.png"
 TIME = 40
 HEART = "heart.png"
+
+
+# Litter
 LITTER = "litter.png"
 LITTER1 = "litter1.png"
+
+# Vehicles
+CAR = "car.png"
+CAR1 = "car1.png"
 
 # Colours
 WHITE = (255, 255, 255)
@@ -33,10 +40,10 @@ PLAYERROTATE1 = "player4.png"
 PLAYERFLIP = "player3.png"
 
 # Values
-PLAYERSPEED = 250
+PLAYERSPEED = 500
 PLAYERFRICTION = -2
 PLAYERINITIALACC = 0.5
 PLAYERLIVES = 3
 
 # Panner
-PANSPEED = 8960
+PANSPEED = 500

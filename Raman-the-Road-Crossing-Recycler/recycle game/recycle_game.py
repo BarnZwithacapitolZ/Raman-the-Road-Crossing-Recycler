@@ -40,9 +40,14 @@ class Game:
         self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
         self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
         self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HEART)).convert_alpha()
-        self.litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
-        self.litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
-        self.litterImages = [self.litterImage, self.litterImage1]
+        #litter
+        litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
+        litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
+        self.litterImages = [litterImage, litterImage1]
+        #vehicles
+        carImage = pygame.image.load(os.path.join(imgFolder, setting.CAR)).convert_alpha()
+        carImage1 = pygame.image.load(os.path.join(imgFolder, setting.CAR1)).convert_alpha()
+        self.vehicleImages = [carImage, carImage1]
 
         self.levels = { 1 : "map.tmx", 2 : "map1.tmx", 3 : "map3.tmx"}
         self.level = setting.DEFAULTLEVEL    
@@ -69,6 +74,7 @@ class Game:
         self.allSprites = pygame.sprite.Group()
         self.litterSprites = pygame.sprite.Group()
         self.collisionSprites = pygame.sprite.Group()
+        self.vehicleSprites = pygame.sprite.Group()
 
         self.map = maps.TiledMap(os.path.join(self.mapFolder, self.levels[self.level]))
         self.mapImg = self.map.make_map()
@@ -79,6 +85,8 @@ class Game:
                 self.player = sprite.Player(self, tileObject.x, tileObject.y)
             if tileObject.name == "Collision":
                 sprite.Obstacle(self, tileObject.x, tileObject.y, tileObject.width, tileObject.height)
+            if tileObject.name == "Vehicle":
+                sprite.Vehicle(self, tileObject.x,  tileObject.y, str(tileObject.type))
             if tileObject.name == "Recycle":
                 self.recycleBin = sprite.Bin(self, tileObject.x, tileObject.y)
             if tileObject.name == "Spawn":
@@ -88,34 +96,36 @@ class Game:
         self.run()
 
     def panCamera(self, speed):  
-        self.panner = sprite.Panner(self, setting.WIDTH / 2, 0)
+        self.panner = sprite.Panner(setting.WIDTH / 2, 0)
         y = setting.HEIGHT / 2 - 10
-        while y < self.map.height - (setting.HEIGHT / 2):
+        while y < self.map.height - (setting.HEIGHT / 2):     
+            self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
-            self.camera.update(self.panner)    
-            self.keyEvents()
+            self.camera.update(self.panner)     
+            self.vehicleSprites.update()
+            self.keyEvents()    
             self.draw(True)        
             y += speed
-        elapse = self.clock.tick(setting.FPS) / 1000
-        return 
+        return       
 
     def run(self):
         self.playing = True
         self.panCamera(self.map.height / setting.PANSPEED)
-        while self.playing:
-           self.dt = self.clock.tick(setting.FPS) / 1000
+        while self.playing:        
            self.keyEvents()
            self.update()
            self.draw()
 
     def update(self):
-        # When not panning down
-        self.allSprites.update()
+        self.dt = self.clock.tick(setting.FPS) / 1000
+        # When not panning down       
+        self.allSprites.update()        
         self.camera.update(self.player)
         now = pygame.time.get_ticks()
         self.timer -= self.dt
 
-        if self.timer < 0:
+        hits = pygame.sprite.spritecollide(self.player, self.vehicleSprites, False)
+        if self.timer < 0 or hits:
             # Run out of time
             self.lives -= 1
             self.load()
@@ -130,10 +140,12 @@ class Game:
                 self.level += 1
                 self.load()
    
+        # Collects litter
         hits = pygame.sprite.spritecollide(self.player, self.litterSprites, False)
         if hits:
             self.player.litter += 1
             self.litterSprites.remove(hits[0])
+            self.allSprites.remove(hits[0])
             hits[0].kill()
 
     def keyEvents(self):
@@ -159,18 +171,19 @@ class Game:
             x += increment
         return x
 
-    def draw(self, level = False):
+    def draw(self, pan = False):
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))        
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
-        if level:
+
+        if pan:
             self.renderMessage(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30)
         else:                      
             self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22)
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
 
             percent = (self.player.litter / self.litter) * 100     
-            percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImage, -74)
+            percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
             self.renderMessage(self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65)
         pygame.display.update()
 
@@ -179,3 +192,4 @@ if __name__ == "__main__":
     while g.running:
         g.load()
     pygame.quit()
+    sys.exit()

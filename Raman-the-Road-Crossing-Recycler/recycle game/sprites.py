@@ -92,9 +92,8 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.y = y
 
 class Panner(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.game = game
         self.rect = pygame.Rect(x, y, 10, 10)
         self.x = x
         self.y = y
@@ -105,12 +104,10 @@ class Bin(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.allSprites, game.collisionSprites
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
         self.image = game.recycleImage
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
 
 class Litter(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -123,3 +120,37 @@ class Litter(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+
+class Vehicle(pygame.sprite.Sprite):
+    def __init__(self, game, x, y, direction):
+        self.groups = game.allSprites, game.collisionSprites, game.vehicleSprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.direction = direction
+        selection = random.randint(0, len(game.vehicleImages) - 1)
+        self.image = game.vehicleImages[selection]
+        self.speed = random.randint(4, 7)
+
+        if direction == "left":
+           self.image = pygame.transform.flip(game.vehicleImages[selection], True, False)
+           self.speed = -self.speed
+           
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.rect.x = x
+        self.rect.y = y
+        
+    def remove(self):
+        self.game.collisionSprites.remove(self)
+        self.game.allSprites.remove(self)
+        Vehicle(self.game, self.x, self.rect.y, self.direction)
+        self.kill()
+
+    def update(self):
+        self.rect.x += self.speed
+        if (self.rect.x > setting.WIDTH and self.direction == "right"):
+            self.remove()
+        elif (self.rect.x < 0 - self.rect.width and self.direction == "left"):
+            self.remove()
+
+           
