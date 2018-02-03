@@ -40,6 +40,7 @@ class Game:
         self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
         self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
         self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HEART)).convert_alpha()
+        self.hazardImage = pygame.image.load(os.path.join(imgFolder, setting.HAZARD)).convert_alpha()
         #litter
         litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
         litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
@@ -75,6 +76,7 @@ class Game:
         self.litterSprites = pygame.sprite.Group()
         self.collisionSprites = pygame.sprite.Group()
         self.vehicleSprites = pygame.sprite.Group()
+        self.hazardSprites = pygame.sprite.Group()
 
         self.map = maps.TiledMap(os.path.join(self.mapFolder, self.levels[self.level]))
         self.mapImg = self.map.make_map()

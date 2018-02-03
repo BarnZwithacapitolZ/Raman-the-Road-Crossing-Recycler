@@ -10,7 +10,7 @@ DEFAULTLEVEL = 1
 RECYCLEBIN = "recycle bin.png"
 TIME = 40
 HEART = "heart.png"
-
+HAZARD = "warning.png"
 
 # Litter
 LITTER = "litter.png"

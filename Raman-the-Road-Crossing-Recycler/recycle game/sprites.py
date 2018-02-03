@@ -129,7 +129,7 @@ class Vehicle(pygame.sprite.Sprite):
         self.direction = direction
         selection = random.randint(0, len(game.vehicleImages) - 1)
         self.image = game.vehicleImages[selection]
-        self.speed = random.randint(4, 7)
+        self.speed = random.randint(3, 5)
 
         if direction == "left":
            self.image = pygame.transform.flip(game.vehicleImages[selection], True, False)
@@ -144,13 +144,30 @@ class Vehicle(pygame.sprite.Sprite):
         self.game.collisionSprites.remove(self)
         self.game.allSprites.remove(self)
         Vehicle(self.game, self.x, self.rect.y, self.direction)
+        for hazard in self.game.hazardSprites:
+            if hazard in self.game.hazardSprites:
+                self.game.hazardSprites.remove(hazard)
+                self.game.allSprites.remove(hazard)
+                hazard.kill()
         self.kill()
 
     def update(self):
-        self.rect.x += self.speed
+        self.rect.x += self.speed  
         if (self.rect.x > setting.WIDTH and self.direction == "right"):
             self.remove()
-        elif (self.rect.x < 0 - self.rect.width and self.direction == "left"):
-            self.remove()
+        elif (self.rect.x > setting.WIDTH / 2 and self.direction == "right"):
+            Hazard(self.game, 0 + setting.TILESIZE, self.rect.y)
 
-           
+        if (self.rect.x < 0 - self.rect.width and self.direction == "left"):
+            self.remove()
+        elif (self.rect.x < setting.WIDTH / 2 - self.rect.width and self.direction == "left"):
+            Hazard(self.game, setting.WIDTH - (setting.TILESIZE * 2), self.rect.y)
+
+class Hazard(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.hazardSprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = game.hazardImage
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
