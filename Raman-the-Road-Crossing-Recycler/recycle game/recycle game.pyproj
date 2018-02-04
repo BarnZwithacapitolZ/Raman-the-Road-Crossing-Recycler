@@ -28,6 +28,9 @@
     <Compile Include="settings.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="setup.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="sprites.py">
       <SubType>Code</SubType>
     </Compile>

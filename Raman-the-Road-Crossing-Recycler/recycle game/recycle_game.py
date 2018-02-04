@@ -50,7 +50,7 @@ class Game:
         carImage1 = pygame.image.load(os.path.join(imgFolder, setting.CAR1)).convert_alpha()
         self.vehicleImages = [carImage, carImage1]
 
-        self.levels = { 1 : "map.tmx", 2 : "map1.tmx", 3 : "map3.tmx"}
+        self.levels = { 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES    
         self.score = 0
@@ -114,11 +114,11 @@ class Game:
     def run(self):
         self.playing = True
         self.panCamera(self.map.height / setting.PANSPEED)
-        while self.playing:        
-           self.keyEvents()
-           self.update()
-           self.draw()
-
+        while self.playing:
+            self.keyEvents()
+            self.update()
+            self.draw(False, False, setting.RED) if self.timer <= 10 else self.draw(False, False, setting.WHITE)
+    
     def update(self):
         self.dt = self.clock.tick(setting.FPS) / 1000
         # When not panning down       
@@ -176,16 +176,6 @@ class Game:
             x += increment
         return x
 
-    def mainMenu(self):
-        self.pos = sprite.MousePos(self)
-        while True:
-             self.dt = self.clock.tick(setting.FPS) / 1000
-             self.pos.update()
-             self.keyEvents()
-             if self.pos.pressed:
-                 break
-        return
-
     def levelCompleteScreen(self):
         self.pos = sprite.MousePos(self)
         self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 100) - self.camera.y, 600, 70)
@@ -211,7 +201,7 @@ class Game:
             self.renderMessage(self.font, "SCORE " + str(round(self.score, 0))[:-2], 70, setting.WHITE, 140, setting.HEIGHT / 2)
             self.renderMessage(self.font, "NEXT LEVEL", 70, col, 100, setting.HEIGHT - 100)
         else:                      
-            self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22)
+            self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, col, 270, 22)
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
 
             percent = (self.player.litter / self.litter) * 100     
