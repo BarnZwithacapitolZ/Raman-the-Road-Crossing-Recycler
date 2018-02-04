@@ -80,6 +80,8 @@ class Player(pygame.sprite.Sprite):
         collide_with_walls(self, self.game.collisionSprites, "y")
         self.rect.center = self.hit_rect.center
 
+        #print(self.rot, self.acc, self.vel, self.pos)
+
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, game, x, y, w, h):
         self.groups = game.collisionSprites
@@ -171,3 +173,32 @@ class Hazard(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+class MousePos(pygame.sprite.Sprite):
+    def __init__(self, game):
+        pygame.sprite.Sprite.__init__(self)
+        self.game = game
+        self.rect = pygame.Rect(0, 0, setting.TILESIZE, setting.TILESIZE)
+        self.x = 0
+        self.y = 0
+        self.rect.x = 0
+        self.rect.y = 0
+        self.pressed = False
+
+    def getMouse(self):
+        if pygame.mouse.get_pressed()[0]:
+                self.pressed = True
+
+    def update(self):
+        mx, my = pygame.mouse.get_pos()
+        mx -= self.game.camera.x
+        my -= self.game.camera.y
+        self.rect.centerx = mx
+        self.rect.centery = my
+        if pygame.sprite.collide_rect(self, self.game.button1):
+            self.game.draw(False, True, setting.RED)
+            self.getMouse()
+        else:
+            self.game.draw(False, True, setting.WHITE)
+
+        

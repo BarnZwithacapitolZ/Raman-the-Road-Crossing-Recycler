@@ -52,7 +52,8 @@ class Game:
 
         self.levels = { 1 : "map.tmx", 2 : "map1.tmx", 3 : "map3.tmx"}
         self.level = setting.DEFAULTLEVEL    
-        self.lives = setting.PLAYERLIVES        
+        self.lives = setting.PLAYERLIVES    
+        self.score = 0
 
     def randomLocations(self, k, offsetX, offsetY, width, height):
         p = []
@@ -140,6 +141,8 @@ class Game:
         if pygame.sprite.collide_rect(self.player, self.recycleBin):
             if self.player.litter >= self.litter:
                 self.level += 1
+                self.score += self.timer
+                self.levelCompleteScreen()
                 self.load()
    
         # Collects litter
@@ -157,7 +160,6 @@ class Game:
                     self.playing = False
                 self.running = False
 
-
     def renderMessage(self, font, text, size, colour, x, y):
         ####render a message to the screen####
         font = pygame.font.Font(font, size)
@@ -166,6 +168,7 @@ class Game:
         text_rect.x = x
         text_rect.y = y
         self.gameDisplay.blit(text_surface, text_rect)
+        return text_rect
 
     def renderObjectImage(self, k, x, y, img, increment):
         for i in range(k):
@@ -173,13 +176,40 @@ class Game:
             x += increment
         return x
 
-    def draw(self, pan = False):
+    def mainMenu(self):
+        self.pos = sprite.MousePos(self)
+        while True:
+             self.dt = self.clock.tick(setting.FPS) / 1000
+             self.pos.update()
+             self.keyEvents()
+             if self.pos.pressed:
+                 break
+        return
+
+    def levelCompleteScreen(self):
+        self.pos = sprite.MousePos(self)
+        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 100) - self.camera.y, 600, 70)
+        while True:
+            self.dt = self.clock.tick(setting.FPS) / 1000
+            self.vehicleSprites.update()
+            self.pos.update()    
+            self.keyEvents()
+            if self.pos.pressed:
+                break
+        return
+
+    def draw(self, pan = False, complete = False, col = setting.WHITE):
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))        
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
 
         if pan:
             self.renderMessage(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30)
+        elif complete:
+            self.renderMessage(self.font, "LEVEL", 70, setting.WHITE, 240, setting.TILESIZE)
+            self.renderMessage(self.font, "COMPLETE!", 70, setting.WHITE, 140, setting.TILESIZE + 100)
+            self.renderMessage(self.font, "SCORE " + str(round(self.score, 0))[:-2], 70, setting.WHITE, 140, setting.HEIGHT / 2)
+            self.renderMessage(self.font, "NEXT LEVEL", 70, col, 100, setting.HEIGHT - 100)
         else:                      
             self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22)
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
@@ -187,6 +217,7 @@ class Game:
             percent = (self.player.litter / self.litter) * 100     
             percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
             self.renderMessage(self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65)
+
         pygame.display.update()
 
 if __name__ == "__main__":
