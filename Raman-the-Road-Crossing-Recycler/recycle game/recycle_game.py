@@ -21,10 +21,12 @@ class Game:
         self.modes = [infoObject.current_w, infoObject.current_h] 
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (self.modes[0] / 2 - (setting.WIDTH / 2), 
                                                             self.modes[1] / 2 - (setting.HEIGHT / 2))
-        self.gameDisplay = pygame.display.set_mode((setting.WIDTH, setting.HEIGHT))
+        self.gameDisplay = pygame.display.set_mode((setting.WIDTH, setting.HEIGHT))     
         self.clock = pygame.time.Clock()
         self.running = True
-        pygame.key.set_repeat(500, 100)      
+        pygame.key.set_repeat(500, 100)     
+        pygame.display.set_caption(setting.TITLE)
+        
         self.loadData()
 
     def loadData(self):
@@ -41,6 +43,8 @@ class Game:
         self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
         self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HEART)).convert_alpha()
         self.hazardImage = pygame.image.load(os.path.join(imgFolder, setting.HAZARD)).convert_alpha()
+        logo = pygame.image.load(os.path.join(imgFolder, setting.ICON)).convert_alpha()
+        pygame.display.set_icon(logo)
         #litter
         litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
         litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()

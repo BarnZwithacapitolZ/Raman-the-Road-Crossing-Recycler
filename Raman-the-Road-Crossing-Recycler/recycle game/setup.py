@@ -24,15 +24,18 @@ shortcut_table = [("DesktopShortcut",
                    None,
                   'TARGETDIR')]
 
-msi_data = {"Shortcut": shortcut_table}
-bdist_msi_options = {'data': msi_data}
+msi_data = {"Shortcut" : shortcut_table}
+bdist_msi_options = {'data' : msi_data}
 
 setup(name = "Raman the Road Crossing Recycler",
       version = "1.0",
       description="Game for college",
-      options = {"build_exe": {"packages":["pygame", "pytmx"],
-                               "include_files":includeFiles},
-                               "bdist_msi": bdist_msi_options},
-      executables = [Executable("recycle_game.py", base = "Win32GUI")])
+      options = {"build_exe" : {"packages" : ["pygame", "pytmx"],
+                               "include_files" : includeFiles},
+                               "bdist_msi" : bdist_msi_options},
+      executables = [Executable("recycle_game.py", 
+                                base = "Win32GUI", 
+                                targetName = "Raman the Road Crossing Recycler.exe", 
+                                icon = "data/images/logo.ico")])
 
 
