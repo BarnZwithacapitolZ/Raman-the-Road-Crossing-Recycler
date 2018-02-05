@@ -8,12 +8,14 @@ FPS = 60
 TITLE = "Raman the Road Crossing Recycler"
 ICON = "logo.png"
 FONT = "joystix monospace.ttf"
-DEFAULTLEVEL = 1
+DEFAULTLEVEL = 0
+DEFAULTSCORE = 0
 RECYCLEBIN = "recycle bin.png"
 TIME = 40
 HEART = "heart.png"
 HAZARD = "warning.png"
 GRAVE = "grave.png"
+TITLEIMG = "title.png"
 
 # Litter
 LITTER = "litter.png"
@@ -54,6 +56,7 @@ PANSPEED = 500
 
 # Messages
 ALLTEXT = { "panText" : "LEVEL ",
-           "gameText" : "TIME ",
-           "completeText" : ["LEVEL", "COMPLETE!", "SCORE ", "NEXT LEVEL"],
-           "deathText" : ["YOU DIED!", "LIVES ", "RESTART"]}
+            "gameText" : "TIME ",
+            "completeText" : ["LEVEL", "COMPLETE!", "SCORE ", "NEXT LEVEL"],
+            "deathText" : ["YOU DIED!", "LIVES ", "RESTART"],
+            "menuText" : "PLAY GAME"}

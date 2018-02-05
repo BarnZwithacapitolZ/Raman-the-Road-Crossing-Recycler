@@ -45,6 +45,7 @@ class Game:
         self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
         self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HEART)).convert_alpha()
         self.hazardImage = pygame.image.load(os.path.join(imgFolder, setting.HAZARD)).convert_alpha()
+        self.titleImage = pygame.image.load(os.path.join(imgFolder, setting.TITLEIMG)).convert_alpha()
         logo = pygame.image.load(os.path.join(imgFolder, setting.ICON)).convert_alpha()
         pygame.display.set_icon(logo)
         #litter
@@ -59,8 +60,8 @@ class Game:
         self.levels = { 0 : "menu.tmx", 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES    
-        self.score = 0
-        #self.load(True)
+        self.score = setting.DEFAULTSCORE
+        self.load(True)
 
     def randomLocations(self, k, offsetX, offsetY, width, height):
         p = []
@@ -78,7 +79,6 @@ class Game:
             self.litter += 1
 
     def load(self, menu = False):
-        print("hi")
         self.litter = 0
         self.timer = setting.TIME
         self.allSprites = pygame.sprite.Group()
@@ -109,13 +109,7 @@ class Game:
     def panCamera(self, speed):  
         self.panner = sprite.Panner(setting.WIDTH / 2, 0)
         y = setting.HEIGHT / 2 - 10
-        panMessage = { "message1" : [self.font, 
-                                     setting.ALLTEXT["panText"] + str(self.level), 
-                                     70, 
-                                     setting.WHITE, 
-                                     180, 
-                                     setting.HEIGHT / 2 - 30]}
-
+        panMessage = { "message1" : [self.font, setting.ALLTEXT["panText"] + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30]}
         while y < self.map.height - (setting.HEIGHT / 2):     
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
@@ -126,11 +120,14 @@ class Game:
             y += speed
         return       
 
-    def mainMenu(self, speed):
+    def mainMenu(self, speed):        
+        self.lives = setting.PLAYERLIVES  
+        self.score = setting.DEFAULTSCORE
         self.panner = sprite.Panner(setting.WIDTH / 2, 0)
-        self.pos = sprite.MousePos(self)
+        completeMessages = { "colorMessage" : [self.font, setting.ALLTEXT["menuText"], 70, setting.WHITE, 130, setting.HEIGHT - 104]}
+        self.pos = sprite.MousePos(self, completeMessages, True)
         y = setting.HEIGHT / 2 - 10
-        self.button1 = sprite.Obstacle(self, 100, setting.HEIGHT - 164, 600, 70)       
+        self.button1 = sprite.Obstacle(self, 100, setting.HEIGHT - 104, 600, 70)       
         while True:
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
@@ -169,60 +166,29 @@ class Game:
             # Run out of time
             self.lives -= 1
             self.player.image = self.playerGraveImage
-            deathMessages = { "message1" : [self.font, 
-                                            setting.ALLTEXT["deathText"][0], 
-                                            70, 
-                                            setting.WHITE, 
-                                            140, 
-                                            setting.TILESIZE], 
-                              "message2" : [self.font, 
-                                            setting.ALLTEXT["deathText"][1] + str(self.lives),
-                                           70, 
-                                           setting.WHITE, 
-                                           180, 
-                                           setting.HEIGHT / 2 - 50],
-                              "colorMessage" : [self.font, 
-                                                setting.ALLTEXT["deathText"][2], 
-                                                70, 
-                                                setting.WHITE, 
-                                                180, 
-                                                setting.HEIGHT - 164]}
+            deathMessages = { "message1" : [self.font, setting.ALLTEXT["deathText"][0], 70, setting.WHITE, 140, setting.TILESIZE], 
+                              "message2" : [self.font,  setting.ALLTEXT["deathText"][1] + str(self.lives), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
+                              "colorMessage" : [self.font, setting.ALLTEXT["deathText"][2], 70, setting.WHITE, 180, setting.HEIGHT - 164]}
             self.textScreen(deathMessages)
             self.load()
 
         if self.lives < 1:
             # game over
-            print("GAME OVER")
+            self.level = setting.DEFAULTLEVEL  
+            self.load(True)
+            self.load()
+
+        print(self.score)
 
         # Completes a level
         if pygame.sprite.collide_rect(self.player, self.recycleBin):
             if self.player.litter >= self.litter:
                 self.level += 1
                 self.score += self.timer
-                completeMessages = { "message1" : [self.font, 
-                                                   setting.ALLTEXT["completeText"][0], 
-                                                   70, 
-                                                   setting.WHITE, 
-                                                   240, 
-                                                   setting.TILESIZE], 
-                                     "message2" : [self.font, 
-                                                   setting.ALLTEXT["completeText"][1], 
-                                                   70, 
-                                                   setting.WHITE, 
-                                                   140, 
-                                                   setting.TILESIZE + 100],
-                                     "message3" : [self.font,
-                                                  setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 
-                                                  70, 
-                                                  setting.WHITE, 
-                                                  150, 
-                                                  setting.HEIGHT / 2],
-                                     "colorMessage" : [self.font, 
-                                                       setting.ALLTEXT["completeText"][3], 
-                                                       70, 
-                                                       setting.WHITE, 
-                                                       100, 
-                                                       setting.HEIGHT - 164]}
+                completeMessages = { "message1White" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
+                                     "message2White" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
+                                     "message3White" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
+                                     "colorMessage" : [self.font, setting.ALLTEXT["completeText"][3], 70, setting.WHITE, 100, setting.HEIGHT - 164]}
                 self.textScreen(completeMessages)
                 self.load()
    
@@ -236,26 +202,15 @@ class Game:
 
         percent = (self.player.litter / self.litter) * 100     
         percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
-        gameMessages = { "message1" : [self.font, 
-                                       setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 
-                                       40, 
-                                       setting.WHITE, 
-                                       270, 
-                                       22], 
-                         "message2" : [self.font, 
-                                       str(round(percent, 0))[:-2] + u"%", 
-                                       40, 
-                                       setting.WHITE, 
-                                       percentX - 55, 
-                                       setting.HEIGHT - 65]}
+        gameMessages = { "message1" : [self.font, setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22], 
+                         "message2" : [self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65]}
         self.draw(gameMessages, False, True)
 
     def keyEvents(self):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                if self.playing:
-                    self.playing = False
-                self.running = False
+                pygame.quit()
+                sys.exit()
 
     def renderMessage(self, font, text, size, colour, x, y):
         ####render a message to the screen####
@@ -274,7 +229,7 @@ class Game:
         return x
 
     def textScreen(self, messages):
-        self.pos = sprite.MousePos(self, messages)
+        self.pos = sprite.MousePos(self, messages, False)
         self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 164) - self.camera.y, 600, 70)      
         while True:
             self.dt = self.clock.tick(setting.FPS) / 1000
@@ -285,17 +240,16 @@ class Game:
                 break
         return
 
-    def draw(self, messageDict = None, fadeSurf = False, game = False):   
+    def draw(self, messageDict = None, fadeSurf = False, game = False, menu = False):   
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
         self.fadeSurface.fill(setting.BLACK)
         self.fadeSurface.set_alpha(150)
-
+    
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
 
-        if fadeSurf:
-            self.gameDisplay.blit(self.fadeSurface, (0, 0))
-
+        if fadeSurf: self.gameDisplay.blit(self.fadeSurface, (0, 0))
+        if menu: self.gameDisplay.blit(self.titleImage, (0, 0))
         if messageDict != None:
             for value in messageDict.values():
                 self.renderMessage(value[0], value[1], value[2], value[3], value[4], value[5])

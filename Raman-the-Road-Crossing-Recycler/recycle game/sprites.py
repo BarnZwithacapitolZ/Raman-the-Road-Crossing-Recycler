@@ -175,10 +175,11 @@ class Hazard(pygame.sprite.Sprite):
         self.rect.y = y
 
 class MousePos(pygame.sprite.Sprite):
-    def __init__(self, game, messages):
+    def __init__(self, game, messages, menu):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
         self.messages = messages
+        self.menu = menu
         self.rect = pygame.Rect(0, 0, setting.TILESIZE, setting.TILESIZE)
         self.x = 0
         self.y = 0
@@ -206,7 +207,7 @@ class MousePos(pygame.sprite.Sprite):
             color = setting.RED
             self.getMouse()
         self.getColor(color)
-        self.game.draw(self.messages, True)
+        self.game.draw(self.messages, True, False, self.menu)
 
 
         
