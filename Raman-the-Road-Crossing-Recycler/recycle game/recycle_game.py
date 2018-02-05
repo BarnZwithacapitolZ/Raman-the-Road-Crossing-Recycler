@@ -55,10 +55,11 @@ class Game:
         carImage1 = pygame.image.load(os.path.join(imgFolder, setting.CAR1)).convert_alpha()
         self.vehicleImages = [carImage, carImage1]
 
-        self.levels = { 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
+        self.levels = { 0 : "menu.tmx", 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES    
         self.score = 0
+        #self.load(True)
 
     def randomLocations(self, k, offsetX, offsetY, width, height):
         p = []
@@ -75,7 +76,8 @@ class Game:
             sprite.Litter(self, currentPoint[0], currentPoint[1])
             self.litter += 1
 
-    def load(self):
+    def load(self, menu = False):
+        print("hi")
         self.litter = 0
         self.timer = setting.TIME
         self.allSprites = pygame.sprite.Group()
@@ -101,28 +103,51 @@ class Game:
                 self.randomLocations(int(tileObject.type), tileObject.x, tileObject.y, tileObject.width, tileObject.height)
           
         self.camera = maps.Camera(self.map.width, self.map.height)
-        self.run()
+        self.mainMenu(1) if menu else self.run()
 
     def panCamera(self, speed):  
         self.panner = sprite.Panner(setting.WIDTH / 2, 0)
         y = setting.HEIGHT / 2 - 10
+        panMessage = { "message1" : [self.font, setting.ALLTEXT["panText"] + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30]}
         while y < self.map.height - (setting.HEIGHT / 2):     
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
             self.camera.update(self.panner)     
             self.vehicleSprites.update()
             self.keyEvents()    
-            self.draw(True)        
+            self.draw(panMessage, True)        
             y += speed
         return       
+
+    def mainMenu(self, speed):
+        self.panner = sprite.Panner(setting.WIDTH / 2, 0)
+        self.pos = sprite.MousePos(self)
+        y = setting.HEIGHT / 2 - 10
+        self.button1 = sprite.Obstacle(self, 100, setting.HEIGHT - 164, 600, 70)       
+        while True:
+            self.dt = self.clock.tick(setting.FPS) / 1000
+            self.panner.rect.y = y
+            self.button1.rect.y += speed
+            self.camera.update(self.panner)
+            self.vehicleSprites.update()
+            self.pos.update()
+            self.keyEvents()
+            y += speed
+            if y >= self.map.height - (setting.HEIGHT / 2):
+                y = setting.HEIGHT / 2
+                self.button1.rect.y = setting.HEIGHT - 164
+            if self.pos.pressed:
+                break
+        self.level += 1
+        return
 
     def run(self):
         self.playing = True
         self.panCamera(self.map.height / setting.PANSPEED)
         while self.playing:
             self.keyEvents()
-            self.update()
-            self.draw(False, False, setting.RED) if self.timer <= 10 else self.draw(False, False, setting.WHITE)
+            self.update()          
+#           self.draw(False, False, setting.RED) if self.timer <= 10 else self.draw(False, False, setting.WHITE)
     
     def update(self):
         self.dt = self.clock.tick(setting.FPS) / 1000
@@ -136,6 +161,10 @@ class Game:
         if self.timer < 0 or hits:
             # Run out of time
             self.lives -= 1
+            deathMessages = { "message1" : [self.font, setting.ALLTEXT["deathText"][0], 70, setting.WHITE, 140, setting.TILESIZE], 
+                              "message2" : [self.font, setting.ALLTEXT["deathText"][1] + str(self.lives), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
+                              "colorMessage" : [self.font, setting.ALLTEXT["deathText"][2], 70, setting.WHITE, 180, setting.HEIGHT - 164]}
+            self.textScreen(deathMessages)
             self.load()
 
         if self.lives < 1:
@@ -147,7 +176,11 @@ class Game:
             if self.player.litter >= self.litter:
                 self.level += 1
                 self.score += self.timer
-                self.levelCompleteScreen()
+                completeMessages = { "message1" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
+                                     "message2" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
+                                     "message3" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
+                                     "colorMessage" : [self.font, setting.ALLTEXT["completeText"][3], 70, setting.WHITE, 100, setting.HEIGHT - 164]}
+                self.textScreen(completeMessages)
                 self.load()
    
         # Collects litter
@@ -157,6 +190,12 @@ class Game:
             self.litterSprites.remove(hits[0])
             self.allSprites.remove(hits[0])
             hits[0].kill()
+
+        percent = (self.player.litter / self.litter) * 100     
+        percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
+        gameMessages = { "message1" : [self.font, setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22], 
+                         "message2" : [self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65]}
+        self.draw(gameMessages, False, True)
 
     def keyEvents(self):
         for e in pygame.event.get():
@@ -181,9 +220,9 @@ class Game:
             x += increment
         return x
 
-    def levelCompleteScreen(self):
-        self.pos = sprite.MousePos(self)
-        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 164) - self.camera.y, 600, 70)
+    def textScreen(self, messages):
+        self.pos = sprite.MousePos(self, messages)
+        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 164) - self.camera.y, 600, 70)      
         while True:
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.vehicleSprites.update()
@@ -193,35 +232,29 @@ class Game:
                 break
         return
 
-    def draw(self, pan = False, complete = False, col = setting.WHITE):
+    def draw(self, messageDict = None, fadeSurf = False, game = False):   
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
         self.fadeSurface.fill(setting.BLACK)
         self.fadeSurface.set_alpha(150)
+
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
 
-        if pan:
+        if fadeSurf:
             self.gameDisplay.blit(self.fadeSurface, (0, 0))
-            self.renderMessage(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30)
-        elif complete:
-            self.gameDisplay.blit(self.fadeSurface, (0, 0))
-            self.renderMessage(self.font, "LEVEL", 70, setting.WHITE, 240, setting.TILESIZE)
-            self.renderMessage(self.font, "COMPLETE!", 70, setting.WHITE, 140, setting.TILESIZE + 100)
-            self.renderMessage(self.font, "SCORE " + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2)
-            self.renderMessage(self.font, "NEXT LEVEL", 70, col, 100, setting.HEIGHT - 164)
-        else:                      
-            self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, col, 270, 22)
+
+        if messageDict != None:
+            for value in messageDict.values():
+                self.renderMessage(value[0], value[1], value[2], value[3], value[4], value[5])
+
+        if game:
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
-
-            percent = (self.player.litter / self.litter) * 100     
-            percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
-            self.renderMessage(self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65)
-
+            self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
         pygame.display.update()
 
 if __name__ == "__main__":
     g = Game()
     while g.running:
-        g.load()
+        g.load(False)
     pygame.quit()
     sys.exit()

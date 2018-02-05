@@ -49,3 +49,10 @@ PLAYERLIVES = 3
 
 # Panner
 PANSPEED = 500
+
+
+# Messages
+ALLTEXT = { "panText" : "LEVEL ",
+           "gameText" : "TIME ",
+           "completeText" : ["LEVEL", "COMPLETE!", "SCORE ", "NEXT LEVEL"],
+           "deathText" : ["YOU DIED!", "LIVES ", "RESTART"]}

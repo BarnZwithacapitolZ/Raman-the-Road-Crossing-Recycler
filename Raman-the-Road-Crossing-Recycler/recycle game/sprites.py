@@ -175,19 +175,25 @@ class Hazard(pygame.sprite.Sprite):
         self.rect.y = y
 
 class MousePos(pygame.sprite.Sprite):
-    def __init__(self, game):
+    def __init__(self, game, messages):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
+        self.messages = messages
         self.rect = pygame.Rect(0, 0, setting.TILESIZE, setting.TILESIZE)
         self.x = 0
         self.y = 0
         self.rect.x = 0
         self.rect.y = 0
-        self.pressed = False
+        self.pressed = False  
 
     def getMouse(self):
         if pygame.mouse.get_pressed()[0]:
                 self.pressed = True
+
+    def getColor(self, col):
+        for key, value in self.messages.items():
+                if key == "colorMessage":
+                    self.messages[key][3] = col
 
     def update(self):
         mx, my = pygame.mouse.get_pos()
@@ -195,10 +201,12 @@ class MousePos(pygame.sprite.Sprite):
         my -= self.game.camera.y
         self.rect.centerx = mx
         self.rect.centery = my
+        color = setting.WHITE
         if pygame.sprite.collide_rect(self, self.game.button1):
-            self.game.draw(False, True, setting.RED)
+            color = setting.RED
             self.getMouse()
-        else:
-            self.game.draw(False, True, setting.WHITE)
+        self.getColor(color)
+        self.game.draw(self.messages, True)
+
 
         
