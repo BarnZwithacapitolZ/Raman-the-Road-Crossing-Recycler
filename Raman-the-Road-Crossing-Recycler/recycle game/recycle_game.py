@@ -139,7 +139,7 @@ class Game:
             y += speed
             if y >= self.map.height - (setting.HEIGHT / 2):
                 y = setting.HEIGHT / 2
-                self.button1.rect.y = setting.HEIGHT - 164
+                self.button1.rect.y = setting.HEIGHT - 104
             if self.pos.pressed:
                 break
         self.level += 1
@@ -151,7 +151,6 @@ class Game:
         while self.playing:
             self.keyEvents()
             self.update()          
-#           self.draw(False, False, setting.RED) if self.timer <= 10 else self.draw(False, False, setting.WHITE)
     
     def update(self):
         self.dt = self.clock.tick(setting.FPS) / 1000
@@ -165,32 +164,40 @@ class Game:
         if self.timer < 0 or hits:
             # Run out of time
             self.lives -= 1
-            self.player.image = self.playerGraveImage
-            deathMessages = { "message1" : [self.font, setting.ALLTEXT["deathText"][0], 70, setting.WHITE, 140, setting.TILESIZE], 
-                              "message2" : [self.font,  setting.ALLTEXT["deathText"][1] + str(self.lives), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
-                              "colorMessage" : [self.font, setting.ALLTEXT["deathText"][2], 70, setting.WHITE, 180, setting.HEIGHT - 164]}
-            self.textScreen(deathMessages)
-            self.load()
-
-        if self.lives < 1:
-            # game over
-            self.level = setting.DEFAULTLEVEL  
-            self.load(True)
-            self.load()
-
-        print(self.score)
-
+            if self.lives < 1:
+                # game over
+                score = "0" if self.score <= 0 else str(round(self.score, 0))[:-2]
+                gameOverMessages = { "message1" : [self.font, setting.ALLTEXT["gameOverText"][0], 70, setting.WHITE, 80, setting.TILESIZE], 
+                                  "message2" : [self.font, setting.ALLTEXT["gameOverText"][1] + score, 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
+                                  "colorMessage" : [self.font, setting.ALLTEXT["gameOverText"][2], 70, setting.WHITE, 120, setting.HEIGHT - 164]}
+                self.textScreen(gameOverMessages)
+                self.level = setting.DEFAULTLEVEL  
+                self.load(True)
+                self.load()
+            else:
+                self.player.image = self.playerGraveImage
+                deathMessages = { "message1" : [self.font, setting.ALLTEXT["deathText"][0], 70, setting.WHITE, 140, setting.TILESIZE], 
+                                  "message2" : [self.font,  setting.ALLTEXT["deathText"][1] + str(self.lives), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
+                                  "colorMessage" : [self.font, setting.ALLTEXT["deathText"][2], 70, setting.WHITE, 180, setting.HEIGHT - 164]}
+                self.textScreen(deathMessages)
+                self.load()
+   
         # Completes a level
         if pygame.sprite.collide_rect(self.player, self.recycleBin):
             if self.player.litter >= self.litter:
                 self.level += 1
                 self.score += self.timer
-                completeMessages = { "message1White" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
-                                     "message2White" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
-                                     "message3White" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
-                                     "colorMessage" : [self.font, setting.ALLTEXT["completeText"][3], 70, setting.WHITE, 100, setting.HEIGHT - 164]}
-                self.textScreen(completeMessages)
-                self.load()
+                if self.level > 3:
+                    self.level = setting.DEFAULTLEVEL  
+                    self.load(True)
+                    self.load()
+                else:
+                    completeMessages = { "message1White" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
+                                         "message2White" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
+                                         "message3White" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
+                                         "colorMessage" : [self.font, setting.ALLTEXT["completeText"][3], 70, setting.WHITE, 100, setting.HEIGHT - 164]}
+                    self.textScreen(completeMessages)
+                    self.load()
    
         # Collects litter
         hits = pygame.sprite.spritecollide(self.player, self.litterSprites, False)
@@ -213,7 +220,6 @@ class Game:
                 sys.exit()
 
     def renderMessage(self, font, text, size, colour, x, y):
-        ####render a message to the screen####
         font = pygame.font.Font(font, size)
         text_surface = font.render(text, True, colour)
         text_rect = text_surface.get_rect()

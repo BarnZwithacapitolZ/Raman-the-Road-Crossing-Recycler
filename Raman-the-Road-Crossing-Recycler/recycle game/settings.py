@@ -59,4 +59,5 @@ ALLTEXT = { "panText" : "LEVEL ",
             "gameText" : "TIME ",
             "completeText" : ["LEVEL", "COMPLETE!", "SCORE ", "NEXT LEVEL"],
             "deathText" : ["YOU DIED!", "LIVES ", "RESTART"],
-            "menuText" : "PLAY GAME"}
+            "menuText" : "PLAY GAME",
+            "gameOverText" : ["GAME OVER!!", "SCORE ", "MAIN MENU"]}
