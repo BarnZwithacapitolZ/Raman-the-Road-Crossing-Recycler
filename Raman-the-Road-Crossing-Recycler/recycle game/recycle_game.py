@@ -22,6 +22,7 @@ class Game:
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (self.modes[0] / 2 - (setting.WIDTH / 2), 
                                                             self.modes[1] / 2 - (setting.HEIGHT / 2))
         self.gameDisplay = pygame.display.set_mode((setting.WIDTH, setting.HEIGHT))     
+        self.fadeSurface = pygame.Surface((setting.WIDTH, setting.HEIGHT))
         self.clock = pygame.time.Clock()
         self.running = True
         pygame.key.set_repeat(500, 100)     
@@ -182,7 +183,7 @@ class Game:
 
     def levelCompleteScreen(self):
         self.pos = sprite.MousePos(self)
-        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 100) - self.camera.y, 600, 70)
+        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 164) - self.camera.y, 600, 70)
         while True:
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.vehicleSprites.update()
@@ -193,17 +194,21 @@ class Game:
         return
 
     def draw(self, pan = False, complete = False, col = setting.WHITE):
-        self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))        
+        self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
+        self.fadeSurface.fill(setting.BLACK)
+        self.fadeSurface.set_alpha(150)
         for s in self.allSprites:
             self.gameDisplay.blit(s.image, self.camera.apply(s))
 
         if pan:
+            self.gameDisplay.blit(self.fadeSurface, (0, 0))
             self.renderMessage(self.font, "LEVEL " + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30)
         elif complete:
+            self.gameDisplay.blit(self.fadeSurface, (0, 0))
             self.renderMessage(self.font, "LEVEL", 70, setting.WHITE, 240, setting.TILESIZE)
             self.renderMessage(self.font, "COMPLETE!", 70, setting.WHITE, 140, setting.TILESIZE + 100)
-            self.renderMessage(self.font, "SCORE " + str(round(self.score, 0))[:-2], 70, setting.WHITE, 140, setting.HEIGHT / 2)
-            self.renderMessage(self.font, "NEXT LEVEL", 70, col, 100, setting.HEIGHT - 100)
+            self.renderMessage(self.font, "SCORE " + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2)
+            self.renderMessage(self.font, "NEXT LEVEL", 70, col, 100, setting.HEIGHT - 164)
         else:                      
             self.renderMessage(self.font, "TIME " + str(round(self.timer, 0))[:-2], 40, col, 270, 22)
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
