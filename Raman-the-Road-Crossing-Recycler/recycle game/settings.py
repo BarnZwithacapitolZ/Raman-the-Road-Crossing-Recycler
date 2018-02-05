@@ -12,14 +12,13 @@ DEFAULTLEVEL = 0
 DEFAULTSCORE = 0
 RECYCLEBIN = "recycle bin.png"
 TIME = 40
-HEART = "heart.png"
-HAZARD = "warning.png"
-GRAVE = "grave.png"
-TITLEIMG = "title.png"
 
 # Litter
-LITTER = "litter.png"
-LITTER1 = "litter1.png"
+LITTER = { "litter1" : "litter.png", "litter2" : "litter1.png", 
+          "litter3" : "litter2.png", "litter4" : "litter3.png"}
+
+HUD = { "heart" : "heart.png", "hazard" : "warning.png",
+       "grave" : "grave.png", "title" : "title.png"}
 
 # Vehicles
 CAR = "car.png"
@@ -60,4 +59,5 @@ ALLTEXT = { "panText" : "LEVEL ",
             "completeText" : ["LEVEL", "COMPLETE!", "SCORE ", "NEXT LEVEL"],
             "deathText" : ["YOU DIED!", "LIVES ", "RESTART"],
             "menuText" : "PLAY GAME",
-            "gameOverText" : ["GAME OVER!!", "SCORE ", "MAIN MENU"]}
+            "gameOverText" : ["GAME OVER!!", "SCORE ", "MAIN MENU"],
+            "gameCompleteText" : ["GAME", "COMPLETE!", "SCORE ", "MAIN MENU"]}

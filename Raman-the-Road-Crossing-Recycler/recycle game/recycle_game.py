@@ -38,20 +38,22 @@ class Game:
         fontFoler = os.path.join(dataFolder, "fonts")
         self.font = os.path.join(fontFoler, setting.FONT)       
         self.playerImage = pygame.image.load(os.path.join(imgFolder, setting.PLAYERIMG)).convert_alpha()
-        self.playerGraveImage = pygame.image.load(os.path.join(imgFolder, setting.GRAVE)).convert_alpha()
+        self.playerGraveImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["grave"])).convert_alpha()
         self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
         self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
         self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
         self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
-        self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HEART)).convert_alpha()
-        self.hazardImage = pygame.image.load(os.path.join(imgFolder, setting.HAZARD)).convert_alpha()
-        self.titleImage = pygame.image.load(os.path.join(imgFolder, setting.TITLEIMG)).convert_alpha()
+        self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["heart"])).convert_alpha()
+        self.hazardImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["hazard"])).convert_alpha()
+        self.titleImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["title"])).convert_alpha()
         logo = pygame.image.load(os.path.join(imgFolder, setting.ICON)).convert_alpha()
         pygame.display.set_icon(logo)
         #litter
-        litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER)).convert_alpha()
-        litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER1)).convert_alpha()
-        self.litterImages = [litterImage, litterImage1]
+        litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter1"])).convert_alpha()
+        litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter2"])).convert_alpha()
+        litterImage2 = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter3"])).convert_alpha()
+        litterImage3 = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter4"])).convert_alpha()
+        self.litterImages = [litterImage, litterImage1, litterImage2, litterImage3]
         #vehicles
         carImage = pygame.image.load(os.path.join(imgFolder, setting.CAR)).convert_alpha()
         carImage1 = pygame.image.load(os.path.join(imgFolder, setting.CAR1)).convert_alpha()
@@ -153,8 +155,7 @@ class Game:
             self.update()          
     
     def update(self):
-        self.dt = self.clock.tick(setting.FPS) / 1000
-        # When not panning down       
+        self.dt = self.clock.tick(setting.FPS) / 1000     
         self.allSprites.update()        
         self.camera.update(self.player)
         now = pygame.time.get_ticks()
@@ -188,13 +189,18 @@ class Game:
                 self.level += 1
                 self.score += self.timer
                 if self.level > 3:
+                    gameCompleteMessages = { "message1" : [self.font, setting.ALLTEXT["gameCompleteText"][0], 70, setting.WHITE, 260, setting.TILESIZE], 
+                                         "message2" : [self.font, setting.ALLTEXT["gameCompleteText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
+                                         "message3" : [self.font, setting.ALLTEXT["gameCompleteText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
+                                         "colorMessage" : [self.font, setting.ALLTEXT["gameCompleteText"][3], 70, setting.WHITE, 120, setting.HEIGHT - 164]}
+                    self.textScreen(gameCompleteMessages)
                     self.level = setting.DEFAULTLEVEL  
                     self.load(True)
                     self.load()
                 else:
-                    completeMessages = { "message1White" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
-                                         "message2White" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
-                                         "message3White" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
+                    completeMessages = { "message" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
+                                         "message2" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
+                                         "message3" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
                                          "colorMessage" : [self.font, setting.ALLTEXT["completeText"][3], 70, setting.WHITE, 100, setting.HEIGHT - 164]}
                     self.textScreen(completeMessages)
                     self.load()
@@ -262,7 +268,7 @@ class Game:
 
         if game:
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
-            self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
+            self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[2], -74)
         pygame.display.update()
 
 if __name__ == "__main__":
