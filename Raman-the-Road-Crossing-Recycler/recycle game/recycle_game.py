@@ -38,6 +38,7 @@ class Game:
         fontFoler = os.path.join(dataFolder, "fonts")
         self.font = os.path.join(fontFoler, setting.FONT)       
         self.playerImage = pygame.image.load(os.path.join(imgFolder, setting.PLAYERIMG)).convert_alpha()
+        self.playerGraveImage = pygame.image.load(os.path.join(imgFolder, setting.GRAVE)).convert_alpha()
         self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
         self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
         self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
@@ -108,7 +109,13 @@ class Game:
     def panCamera(self, speed):  
         self.panner = sprite.Panner(setting.WIDTH / 2, 0)
         y = setting.HEIGHT / 2 - 10
-        panMessage = { "message1" : [self.font, setting.ALLTEXT["panText"] + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30]}
+        panMessage = { "message1" : [self.font, 
+                                     setting.ALLTEXT["panText"] + str(self.level), 
+                                     70, 
+                                     setting.WHITE, 
+                                     180, 
+                                     setting.HEIGHT / 2 - 30]}
+
         while y < self.map.height - (setting.HEIGHT / 2):     
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
@@ -161,9 +168,25 @@ class Game:
         if self.timer < 0 or hits:
             # Run out of time
             self.lives -= 1
-            deathMessages = { "message1" : [self.font, setting.ALLTEXT["deathText"][0], 70, setting.WHITE, 140, setting.TILESIZE], 
-                              "message2" : [self.font, setting.ALLTEXT["deathText"][1] + str(self.lives), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
-                              "colorMessage" : [self.font, setting.ALLTEXT["deathText"][2], 70, setting.WHITE, 180, setting.HEIGHT - 164]}
+            self.player.image = self.playerGraveImage
+            deathMessages = { "message1" : [self.font, 
+                                            setting.ALLTEXT["deathText"][0], 
+                                            70, 
+                                            setting.WHITE, 
+                                            140, 
+                                            setting.TILESIZE], 
+                              "message2" : [self.font, 
+                                            setting.ALLTEXT["deathText"][1] + str(self.lives),
+                                           70, 
+                                           setting.WHITE, 
+                                           180, 
+                                           setting.HEIGHT / 2 - 50],
+                              "colorMessage" : [self.font, 
+                                                setting.ALLTEXT["deathText"][2], 
+                                                70, 
+                                                setting.WHITE, 
+                                                180, 
+                                                setting.HEIGHT - 164]}
             self.textScreen(deathMessages)
             self.load()
 
@@ -176,10 +199,30 @@ class Game:
             if self.player.litter >= self.litter:
                 self.level += 1
                 self.score += self.timer
-                completeMessages = { "message1" : [self.font, setting.ALLTEXT["completeText"][0], 70, setting.WHITE, 240, setting.TILESIZE], 
-                                     "message2" : [self.font, setting.ALLTEXT["completeText"][1], 70, setting.WHITE, 140, setting.TILESIZE + 100],
-                                     "message3" : [self.font, setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 70, setting.WHITE, 150, setting.HEIGHT / 2],
-                                     "colorMessage" : [self.font, setting.ALLTEXT["completeText"][3], 70, setting.WHITE, 100, setting.HEIGHT - 164]}
+                completeMessages = { "message1" : [self.font, 
+                                                   setting.ALLTEXT["completeText"][0], 
+                                                   70, 
+                                                   setting.WHITE, 
+                                                   240, 
+                                                   setting.TILESIZE], 
+                                     "message2" : [self.font, 
+                                                   setting.ALLTEXT["completeText"][1], 
+                                                   70, 
+                                                   setting.WHITE, 
+                                                   140, 
+                                                   setting.TILESIZE + 100],
+                                     "message3" : [self.font,
+                                                  setting.ALLTEXT["completeText"][2] + str(round(self.score, 0))[:-2], 
+                                                  70, 
+                                                  setting.WHITE, 
+                                                  150, 
+                                                  setting.HEIGHT / 2],
+                                     "colorMessage" : [self.font, 
+                                                       setting.ALLTEXT["completeText"][3], 
+                                                       70, 
+                                                       setting.WHITE, 
+                                                       100, 
+                                                       setting.HEIGHT - 164]}
                 self.textScreen(completeMessages)
                 self.load()
    
@@ -193,8 +236,18 @@ class Game:
 
         percent = (self.player.litter / self.litter) * 100     
         percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
-        gameMessages = { "message1" : [self.font, setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22], 
-                         "message2" : [self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65]}
+        gameMessages = { "message1" : [self.font, 
+                                       setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 
+                                       40, 
+                                       setting.WHITE, 
+                                       270, 
+                                       22], 
+                         "message2" : [self.font, 
+                                       str(round(percent, 0))[:-2] + u"%", 
+                                       40, 
+                                       setting.WHITE, 
+                                       percentX - 55, 
+                                       setting.HEIGHT - 65]}
         self.draw(gameMessages, False, True)
 
     def keyEvents(self):
