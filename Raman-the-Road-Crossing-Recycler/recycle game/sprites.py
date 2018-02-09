@@ -180,16 +180,15 @@ class MousePos(pygame.sprite.Sprite):
         self.game = game
         self.messages = messages
         self.menu = menu
-        self.rect = pygame.Rect(0, 0, setting.TILESIZE, setting.TILESIZE)
+        self.rect = pygame.Rect(0, 0, 32, 32)
         self.x = 0
         self.y = 0
         self.rect.x = 0
         self.rect.y = 0
         self.pressed = False  
-        self.allowFlag = False
 
     def getMouse(self):
-        if pygame.mouse.get_pressed()[0] and self.allowFlag:
+        if pygame.mouse.get_pressed()[0]:
                 self.pressed = True
 
     def getColor(self, col):
@@ -203,12 +202,6 @@ class MousePos(pygame.sprite.Sprite):
         my -= self.game.camera.y
         self.rect.centerx = mx
         self.rect.centery = my
-
-        #Prevent accidentle presses on page load by creating delay
-        now = pygame.time.get_ticks()
-        if now % 50 == 0:
-            self.allowFlag = True
-
         color = setting.WHITE
         if pygame.sprite.collide_rect(self, self.game.button1):
             color = setting.RED

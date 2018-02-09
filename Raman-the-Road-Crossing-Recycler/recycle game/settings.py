@@ -21,8 +21,15 @@ HUD = { "heart" : "heart.png", "hazard" : "warning.png",
        "grave" : "grave.png", "title" : "title.png"}
 
 # Vehicles
+VEHICLES = { "car1" : "car.png", "car2" : "car1.png", "car3" : "car2.png",
+            "car4" : "car3.png", "truck1" : "truck1.png", "truck2" : "truck2.png"}
+
 CAR = "car.png"
 CAR1 = "car1.png"
+CAR2 = "car2.png"
+CAR3 = "car3.png"
+TRUCK = "truck1.png"
+TRUCK1 = "truck2.png"
 
 # Colours
 WHITE = (255, 255, 255)
@@ -44,8 +51,8 @@ PLAYERROTATE1 = "player4.png"
 PLAYERFLIP = "player3.png"
 
 # Values
-PLAYERSPEED = 500
-PLAYERFRICTION = -2
+PLAYERSPEED = 1900
+PLAYERFRICTION = -10
 PLAYERINITIALACC = 0.5
 PLAYERLIVES = 3
 

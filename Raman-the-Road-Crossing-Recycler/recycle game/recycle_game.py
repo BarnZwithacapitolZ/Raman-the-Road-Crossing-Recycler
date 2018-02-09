@@ -27,7 +27,6 @@ class Game:
         self.running = True
         pygame.key.set_repeat(500, 100)     
         pygame.display.set_caption(setting.TITLE)
-        
         self.loadData()
 
     def loadData(self):
@@ -49,21 +48,23 @@ class Game:
         logo = pygame.image.load(os.path.join(imgFolder, setting.ICON)).convert_alpha()
         pygame.display.set_icon(logo)
         #litter
-        litterImage = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter1"])).convert_alpha()
-        litterImage1 = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter2"])).convert_alpha()
-        litterImage2 = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter3"])).convert_alpha()
-        litterImage3 = pygame.image.load(os.path.join(imgFolder, setting.LITTER["litter4"])).convert_alpha()
-        self.litterImages = [litterImage, litterImage1, litterImage2, litterImage3]
+        self.litterImages = self.getImage(imgFolder, setting.LITTER)
         #vehicles
-        carImage = pygame.image.load(os.path.join(imgFolder, setting.CAR)).convert_alpha()
-        carImage1 = pygame.image.load(os.path.join(imgFolder, setting.CAR1)).convert_alpha()
-        self.vehicleImages = [carImage, carImage1]
-
+        self.vehicleImages = self.getImage(imgFolder, setting.VEHICLES)
+        #levels
         self.levels = { 0 : "menu.tmx", 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES    
         self.score = setting.DEFAULTSCORE
         self.load(True)
+
+    def getImage(self, folder, imageDict):
+        imgList = []
+        for image in imageDict.values():
+            img = pygame.image.load(os.path.join(folder, image)).convert_alpha()
+            print(img)
+            imgList.append(img)
+        return imgList
 
     def randomLocations(self, k, offsetX, offsetY, width, height):
         p = []
