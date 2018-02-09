@@ -46,7 +46,7 @@
   <object id="14" name="Spawn" type="1" x="0" y="0" width="768" height="320"/>
   <object id="15" name="Spawn" type="2" x="0" y="1472" width="768" height="320"/>
   <object id="20" name="Spawn" type="1" x="0" y="960" width="768" height="320"/>
-  <object id="25" name="Collision" x="48" y="576" width="112" height="256"/>
+  <object id="25" name="Collision" x="48" y="592" width="112" height="240"/>
   <object id="26" name="Collision" x="240" y="624" width="512" height="144"/>
   <object id="27" name="Collision" x="416" y="576" width="336" height="48"/>
  </objectgroup>

@@ -55,14 +55,16 @@ class Game:
         self.levels = { 0 : "menu.tmx", 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES    
-        self.score = setting.DEFAULTSCORE
+        self.score = setting.DEFAULTSCORE    
+        self.showInfo("data/images/infoRaman.png")
+        self.showInfo("data/images/info.png")
+        self.showInfo("data/images/infoStory.png")
         self.load(True)
 
     def getImage(self, folder, imageDict):
         imgList = []
         for image in imageDict.values():
             img = pygame.image.load(os.path.join(folder, image)).convert_alpha()
-            print(img)
             imgList.append(img)
         return imgList
 
@@ -146,6 +148,9 @@ class Game:
             if self.pos.pressed:
                 break
         self.level += 1
+        self.showInfo("data/images/controls.png")
+        self.showInfo("data/images/gameExplain.png")
+        self.showInfo("data/images/deathExplain.png")
         return
 
     def run(self):
@@ -220,11 +225,15 @@ class Game:
                          "message2" : [self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65]}
         self.draw(gameMessages, False, True)
 
-    def keyEvents(self):
+    def keyEvents(self, end = False):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_RETURN and end:
+                    return False
+        return True
 
     def renderMessage(self, font, text, size, colour, x, y):
         font = pygame.font.Font(font, size)
@@ -252,6 +261,28 @@ class Game:
             if self.pos.pressed:
                 break
         return
+
+    def fade_screen(self, background, fade, time):
+        for x in range(fade):
+            self.gameDisplay.blit(background, (0, 0))
+            self.fadeSurface.fill(setting.BLACK)
+            self.fadeSurface.set_alpha(0 + x * time)
+            self.gameDisplay.blit(self.fadeSurface, (0, 0))
+            self.dt = self.clock.tick(setting.FPS) / 1000
+            self.keyEvents()
+            pygame.display.update()
+
+    def showInfo(self, img):
+        background = pygame.image.load(img).convert_alpha()
+        running = True
+        while running:
+            self.dt = self.clock.tick(setting.FPS) / 1000
+            self.gameDisplay.blit(background, (0, 0))
+            running = self.keyEvents(True)
+            pygame.display.update()
+            if not running:
+                break
+        self.fade_screen(background, 50, 5)
 
     def draw(self, messageDict = None, fadeSurf = False, game = False, menu = False):   
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
