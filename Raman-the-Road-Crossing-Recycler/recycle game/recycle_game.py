@@ -7,7 +7,7 @@ import mapConfig as maps
 import sprites as sprite
 
 def getFilePath():
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, 'frozen', False): #for when .exe
         return os.path.dirname(sys.executable)
     else:
         return os.path.dirname(__file__)
@@ -20,9 +20,9 @@ class Game:
         infoObject = pygame.display.Info()
         self.modes = [infoObject.current_w, infoObject.current_h] 
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (self.modes[0] / 2 - (setting.WIDTH / 2), 
-                                                            self.modes[1] / 2 - (setting.HEIGHT / 2))
+                                                            self.modes[1] / 2 - (setting.HEIGHT / 2)) #position display to monitor centre
         self.gameDisplay = pygame.display.set_mode((setting.WIDTH, setting.HEIGHT))     
-        self.fadeSurface = pygame.Surface((setting.WIDTH, setting.HEIGHT))
+        self.fadeSurface = pygame.Surface((setting.WIDTH, setting.HEIGHT)) #for ontop of game display
         self.clock = pygame.time.Clock()
         self.running = True
         pygame.key.set_repeat(500, 100)     
@@ -30,6 +30,7 @@ class Game:
         self.loadData()
 
     def loadData(self):
+        #only load once, during game initialisation
         gameFolder = getFilePath()
         dataFolder = os.path.join(gameFolder, "data")
         self.mapFolder = os.path.join(dataFolder, "maps")
@@ -59,7 +60,7 @@ class Game:
         self.showInfo("data/images/infoRaman.png")
         self.showInfo("data/images/info.png")
         self.showInfo("data/images/infoStory.png")
-        self.load(True)
+        self.load(True) #run game
 
     def getImage(self, folder, imageDict):
         imgList = []
@@ -86,6 +87,7 @@ class Game:
     def load(self, menu = False):
         self.litter = 0
         self.timer = setting.TIME
+        #Sprite and object groups
         self.allSprites = pygame.sprite.Group()
         self.litterSprites = pygame.sprite.Group()
         self.collisionSprites = pygame.sprite.Group()
@@ -94,9 +96,9 @@ class Game:
 
         self.map = maps.TiledMap(os.path.join(self.mapFolder, self.levels[self.level]))
         self.mapImg = self.map.make_map()
-        self.mapRect = self.mapImg.get_rect()
+        self.mapRect = self.mapImg.get_rect() #for width, height
 
-        for tileObject in self.map.tmxdata.objects:
+        for tileObject in self.map.tmxdata.objects: #each object to screen
             if tileObject.name == "Player":
                 self.player = sprite.Player(self, tileObject.x, tileObject.y)
             if tileObject.name == "Collision":
@@ -113,12 +115,12 @@ class Game:
 
     def panCamera(self, speed):  
         self.panner = sprite.Panner(setting.WIDTH / 2, 0)
-        y = setting.HEIGHT / 2 - 10
+        y = setting.HEIGHT / 2 - 10 #panner start position
         panMessage = { "message1" : [self.font, setting.ALLTEXT["panText"] + str(self.level), 70, setting.WHITE, 180, setting.HEIGHT / 2 - 30]}
         while y < self.map.height - (setting.HEIGHT / 2):     
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
-            self.camera.update(self.panner)     
+            self.camera.update(self.panner) #make screen pan down    
             self.vehicleSprites.update()
             self.keyEvents()    
             self.draw(panMessage, True)        
@@ -131,32 +133,32 @@ class Game:
         self.panner = sprite.Panner(setting.WIDTH / 2, 0)
         completeMessages = { "colorMessage" : [self.font, setting.ALLTEXT["menuText"], 70, setting.WHITE, 130, setting.HEIGHT - 104]}
         self.pos = sprite.MousePos(self, completeMessages, True)
-        y = setting.HEIGHT / 2 - 10
+        y = setting.HEIGHT / 2 - 10 #panner start position
         self.button1 = sprite.Obstacle(self, 100, setting.HEIGHT - 104, 600, 70)       
         while True:
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.panner.rect.y = y
             self.button1.rect.y += speed
-            self.camera.update(self.panner)
+            self.camera.update(self.panner) #make screen pan down
             self.vehicleSprites.update()
             self.pos.update()
             self.keyEvents()
             y += speed
-            if y >= self.map.height - (setting.HEIGHT / 2):
+            if y >= self.map.height - (setting.HEIGHT / 2): #infinatly scroll down
                 y = setting.HEIGHT / 2
                 self.button1.rect.y = setting.HEIGHT - 104
             if self.pos.pressed:
                 break
-        self.level += 1   
+        self.level += 1 #to first level
         self.showInfo("data/images/gameExplain.png")
         self.showInfo("data/images/deathExplain.png")
         self.showInfo("data/images/controls.png")
-        return
+        return 
 
     def run(self):
         self.playing = True
         self.panCamera(self.map.height / setting.PANSPEED)
-        while self.playing:
+        while self.playing: #gameloop
             self.keyEvents()
             self.update()          
     
@@ -178,8 +180,8 @@ class Game:
                                   "message2" : [self.font, setting.ALLTEXT["gameOverText"][1] + score, 70, setting.WHITE, 180, setting.HEIGHT / 2 - 50],
                                   "colorMessage" : [self.font, setting.ALLTEXT["gameOverText"][2], 70, setting.WHITE, 120, setting.HEIGHT - 164]}
                 self.textScreen(gameOverMessages)
-                self.level = setting.DEFAULTLEVEL  
-                self.load(True)
+                self.level = setting.DEFAULTLEVEL #go back to beggining level  
+                self.load(True) #reset the game
                 self.load()
             else:
                 self.player.image = self.playerGraveImage
@@ -217,9 +219,9 @@ class Game:
             self.player.litter += 1
             self.litterSprites.remove(hits[0])
             self.allSprites.remove(hits[0])
-            hits[0].kill()
+            hits[0].kill() #remove litter from screen after groups
 
-        percent = (self.player.litter / self.litter) * 100     
+        percent = (self.player.litter / self.litter) * 100 #how much litter the player has obtained
         percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
         gameMessages = { "message1" : [self.font, setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22], 
                          "message2" : [self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65]}
@@ -231,7 +233,7 @@ class Game:
                 pygame.quit()
                 sys.exit()
             if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_RETURN and end:
+                if e.key == pygame.K_RETURN and end: #only for info screens
                     return False
         return True
 
@@ -245,20 +247,20 @@ class Game:
         return text_rect
 
     def renderObjectImage(self, k, x, y, img, increment):
-        for i in range(k):
+        for i in range(k): #repeat for the number of objects, k
             self.gameDisplay.blit(img, (x, y))
-            x += increment
+            x += increment #draw at next location
         return x
 
     def textScreen(self, messages):
         self.pos = sprite.MousePos(self, messages, False)
-        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 164) - self.camera.y, 600, 70)      
+        self.button1 = sprite.Obstacle(self, 100, (setting.HEIGHT - 164) - self.camera.y, 600, 70) # - camera y to revert apply   
         while True:
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.vehicleSprites.update()
             self.pos.update()    
             self.keyEvents()
-            if self.pos.pressed:
+            if self.pos.pressed: #when player 'presses' button
                 break
         return
 
@@ -266,7 +268,7 @@ class Game:
         for x in range(fade):
             self.gameDisplay.blit(background, (0, 0))
             self.fadeSurface.fill(setting.BLACK)
-            self.fadeSurface.set_alpha(0 + x * time)
+            self.fadeSurface.set_alpha(0 + x * time) #decrease opacity
             self.gameDisplay.blit(self.fadeSurface, (0, 0))
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.keyEvents()
@@ -278,11 +280,11 @@ class Game:
         while running:
             self.dt = self.clock.tick(setting.FPS) / 1000
             self.gameDisplay.blit(background, (0, 0))
-            running = self.keyEvents(True)
+            running = self.keyEvents(True) #return if the player escapes the screen
             pygame.display.update()
             if not running:
                 break
-        self.fade_screen(background, 50, 5)
+        self.fade_screen(background, 50, 5) #when complete, fade screen
 
     def draw(self, messageDict = None, fadeSurf = False, game = False, menu = False):   
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
@@ -290,13 +292,13 @@ class Game:
         self.fadeSurface.set_alpha(150)
     
         for s in self.allSprites:
-            self.gameDisplay.blit(s.image, self.camera.apply(s))
+            self.gameDisplay.blit(s.image, self.camera.apply(s)) #apply camera so locations are expressive
 
         if fadeSurf: self.gameDisplay.blit(self.fadeSurface, (0, 0))
         if menu: self.gameDisplay.blit(self.titleImage, (0, 0))
-        if messageDict != None:
+        if messageDict != None: #if there are messages to write
             for value in messageDict.values():
-                self.renderMessage(value[0], value[1], value[2], value[3], value[4], value[5])
+                self.renderMessage(value[0], value[1], value[2], value[3], value[4], value[5]) #draw each message
 
         if game:
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
@@ -306,6 +308,6 @@ class Game:
 if __name__ == "__main__":
     g = Game()
     while g.running:
-        g.load(False)
+        g.load(False) #run the game
     pygame.quit()
     sys.exit()

@@ -20,17 +20,17 @@ class Map:
 class TiledMap:
     def __init__(self, filename):
         tm = pytmx.load_pygame(filename, pixelalpha = True)
-        self.width = tm.width * tm.tilewidth
-        self.height = tm.height * tm.tileheight
+        self.width = tm.width * tm.tilewidth #map width 
+        self.height = tm.height * tm.tileheight #map height
         self.tmxdata = tm
 
     def render(self, surface):
         ti = self.tmxdata.get_tile_image_by_gid
         for layer in self.tmxdata.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer):
-                for x, y, gid, in layer:
+                for x, y, gid, in layer: #each tile
                     tile = ti(gid)
-                    if tile:
+                    if tile: #not blank (else black)
                         surface.blit(tile, (x * self.tmxdata.tilewidth, y * self.tmxdata.tileheight))
 
     def make_map(self):
@@ -60,4 +60,4 @@ class Camera:
         x = max(-(self.width - WIDTH), x)
         y = max(-(self.height - HEIGHT), y)
         self.camera = pygame.Rect(x, y, self.width, self.height)
-        self.x, self.y = x, y
+        self.x, self.y = x, y #for offset with objects

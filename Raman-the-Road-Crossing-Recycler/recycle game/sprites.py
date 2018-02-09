@@ -45,16 +45,17 @@ class Player(pygame.sprite.Sprite):
     def getKeys(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
-            self.acc = vec(setting.PLAYERSPEED, 0).rotate(-self.rot)
+            self.acc = vec(setting.PLAYERSPEED, 0).rotate(-self.rot) #move towards mouse
 
     def update(self):
-        self.acc = (0, 0)
+        self.acc = (0, 0) #prevent infinate movement
         self.getKeys()
         mx, my = pygame.mouse.get_pos()
         mx -= self.game.camera.x
         my -= self.game.camera.y
         self.rot = ((mx, my) - self.pos).angle_to(vec(1, 0))
         
+        #rotate sprite relative to mouse
         if self.rot > -110 and self.rot < -70:
             self.image = self.game.playerImage
         elif self.rot > -70 and self.rot < 10:
@@ -68,7 +69,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.image = self.game.playerRotate
     
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect() #resize (if needed)
         self.rect.center = self.pos      
         self.acc += self.vel * setting.PLAYERFRICTION 
         self.vel += self.acc * self.game.dt
@@ -138,7 +139,7 @@ class Vehicle(pygame.sprite.Sprite):
            self.speed = -self.speed
            
         self.rect = self.image.get_rect()
-        self.x = x
+        self.x = x #for spawning new
         self.rect.x = x
         self.rect.y = y
         
@@ -147,11 +148,11 @@ class Vehicle(pygame.sprite.Sprite):
         self.game.allSprites.remove(self)
         Vehicle(self.game, self.x, self.rect.y, self.direction)
         for hazard in self.game.hazardSprites:
-            if hazard in self.game.hazardSprites:
+            if hazard in self.game.hazardSprites: #found hazard
                 self.game.hazardSprites.remove(hazard)
                 self.game.allSprites.remove(hazard)
-                hazard.kill()
-        self.kill()
+                hazard.kill() #remove hazard
+        self.kill() #remove sprite
 
     def update(self):
         self.rect.x += self.speed  
@@ -188,12 +189,12 @@ class MousePos(pygame.sprite.Sprite):
         self.pressed = False  
 
     def getMouse(self):
-        if pygame.mouse.get_pressed()[0]:
+        if pygame.mouse.get_pressed()[0]: #presses the button
                 self.pressed = True
 
     def getColor(self, col):
         for key, value in self.messages.items():
-                if key == "colorMessage":
+                if key == "colorMessage": #Only when button
                     self.messages[key][3] = col
 
     def update(self):
@@ -203,7 +204,7 @@ class MousePos(pygame.sprite.Sprite):
         self.rect.centerx = mx
         self.rect.centery = my
         color = setting.WHITE
-        if pygame.sprite.collide_rect(self, self.game.button1):
+        if pygame.sprite.collide_rect(self, self.game.button1): #hover over button
             color = setting.RED
             self.getMouse()
         self.getColor(color)
