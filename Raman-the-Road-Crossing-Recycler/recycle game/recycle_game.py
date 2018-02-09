@@ -147,10 +147,10 @@ class Game:
                 self.button1.rect.y = setting.HEIGHT - 104
             if self.pos.pressed:
                 break
-        self.level += 1
-        self.showInfo("data/images/controls.png")
+        self.level += 1   
         self.showInfo("data/images/gameExplain.png")
         self.showInfo("data/images/deathExplain.png")
+        self.showInfo("data/images/controls.png")
         return
 
     def run(self):
