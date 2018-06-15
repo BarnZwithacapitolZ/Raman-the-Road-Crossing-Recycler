@@ -25,6 +25,7 @@ class Game:
         self.fadeSurface = pygame.Surface((setting.WIDTH, setting.HEIGHT)) #for ontop of game display
         self.clock = pygame.time.Clock()
         self.running = True
+        self.debug = False
         pygame.key.set_repeat(500, 100)     
         pygame.display.set_caption(setting.TITLE)
         self.loadData()
@@ -36,30 +37,37 @@ class Game:
         self.mapFolder = os.path.join(dataFolder, "maps")
         imgFolder = os.path.join(dataFolder, "images")
         fontFoler = os.path.join(dataFolder, "fonts")
-        self.font = os.path.join(fontFoler, setting.FONT)       
-        self.playerImage = pygame.image.load(os.path.join(imgFolder, setting.PLAYERIMG)).convert_alpha()
-        self.playerGraveImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["grave"])).convert_alpha()
-        self.playerRotate = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE)).convert_alpha()
-        self.playerFlip = pygame.image.load(os.path.join(imgFolder, setting.PLAYERFLIP)).convert_alpha()
-        self.playerRotate1 = pygame.image.load(os.path.join(imgFolder, setting.PLAYERROTATE1)).convert_alpha()
-        self.recycleImage = pygame.image.load(os.path.join(imgFolder, setting.RECYCLEBIN)).convert_alpha()
-        self.heartImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["heart"])).convert_alpha()
-        self.hazardImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["hazard"])).convert_alpha()
+        self.font = os.path.join(fontFoler, setting.FONT) 
+        self.spritesheetPlayer = sprite.Spritesheet(os.path.join(imgFolder, "spritesheetPlayer.png"))
+        self.spritesheetObjects = sprite.Spritesheet(os.path.join(imgFolder, "spritesheetObjects.png"))
+        self.playerGraveImage = self.spritesheetObjects.get_image(0, 99, 64, 80)
+        self.binImage = self.spritesheetObjects.get_image(0, 0, 64, 99)
+        self.heartImage = self.spritesheetObjects.get_image(128, 0, 64, 64)
+        self.hazardImage = self.spritesheetObjects.get_image(64, 0, 64, 53)
         self.titleImage = pygame.image.load(os.path.join(imgFolder, setting.HUD["title"])).convert_alpha()
+        
         logo = pygame.image.load(os.path.join(imgFolder, setting.ICON)).convert_alpha()
         pygame.display.set_icon(logo)
         #litter
-        self.litterImages = self.getImage(imgFolder, setting.LITTER)
+        self.litterImages = [self.spritesheetObjects.get_image(192, 0, 64, 64),
+                             self.spritesheetObjects.get_image(64, 64, 64, 64),
+                             self.spritesheetObjects.get_image(128, 64, 64, 64),
+                             self.spritesheetObjects.get_image(192, 64, 64, 64)]
         #vehicles
-        self.vehicleImages = self.getImage(imgFolder, setting.VEHICLES)
+        self.vehicleImages = [self.spritesheetObjects.get_image(0, 179, 256, 112),
+                              self.spritesheetObjects.get_image(0, 291, 276, 128),
+                              self.spritesheetObjects.get_image(276, 258, 295, 108),
+                              self.spritesheetObjects.get_image(256, 0, 256, 128),
+                              self.spritesheetObjects.get_image(256, 128, 183, 130),
+                              self.spritesheetObjects.get_image(0, 419, 369, 130)]
         #levels
         self.levels = { 0 : "menu.tmx", 1 : "map.tmx", 2 : "map1.tmx", 3 : "map2.tmx"}
         self.level = setting.DEFAULTLEVEL    
         self.lives = setting.PLAYERLIVES    
         self.score = setting.DEFAULTSCORE    
-        self.showInfo("data/images/infoRaman.png")
-        self.showInfo("data/images/info.png")
-        self.showInfo("data/images/infoStory.png")
+        #self.showInfo("data/images/infoRaman.png")
+        #self.showInfo("data/images/info.png")
+        #self.showInfo("data/images/infoStory.png")
         self.load(True) #run game
 
     def getImage(self, folder, imageDict):
@@ -150,9 +158,9 @@ class Game:
             if self.pos.pressed:
                 break
         self.level += 1 #to first level
-        self.showInfo("data/images/gameExplain.png")
-        self.showInfo("data/images/deathExplain.png")
-        self.showInfo("data/images/controls.png")
+        #self.showInfo("data/images/gameExplain.png")
+        #self.showInfo("data/images/deathExplain.png")
+        #self.showInfo("data/images/controls.png")
         return 
 
     def run(self):
@@ -170,7 +178,6 @@ class Game:
         self.timer -= self.dt
 
         hits = pygame.sprite.spritecollide(self.player, self.vehicleSprites, False, maps.collide_hit_rect)
-        print(hits)
         if self.timer < 0 or hits:
             # Run out of time
             self.lives -= 1
@@ -194,7 +201,7 @@ class Game:
    
         # Completes a level
         if pygame.sprite.collide_rect(self.player, self.recycleBin):
-            if self.player.litter >= self.litter:
+            if len(self.player.litterHit) >= self.litter:
                 self.level += 1
                 self.score += self.timer
                 if self.level > 3:
@@ -217,13 +224,14 @@ class Game:
         # Collects litter
         hits = pygame.sprite.spritecollide(self.player, self.litterSprites, False)
         if hits:
-            self.player.litter += 1
+            self.player.litterHit.append(hits[0].image)
             self.litterSprites.remove(hits[0])
             self.allSprites.remove(hits[0])
             hits[0].kill() #remove litter from screen after groups
 
-        percent = (self.player.litter / self.litter) * 100 #how much litter the player has obtained
-        percentX = self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
+
+        percent = (len(self.player.litterHit) / self.litter) * 100 #how much litter the player has obtained
+        percentX = self.renderObjectImage(len(self.player.litterHit), setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[0], -74)
         gameMessages = { "message1" : [self.font, setting.ALLTEXT["gameText"] + str(round(self.timer, 0))[:-2], 40, setting.WHITE, 270, 22], 
                          "message2" : [self.font, str(round(percent, 0))[:-2] + u"%", 40, setting.WHITE, percentX - 55, setting.HEIGHT - 65]}
         self.draw(gameMessages, False, True)
@@ -236,6 +244,8 @@ class Game:
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_RETURN and end: #only for info screens
                     return False
+                if e.key == pygame.K_d:
+                    self.debug = not self.debug
         return True
 
     def renderMessage(self, font, text, size, colour, x, y):
@@ -249,7 +259,10 @@ class Game:
 
     def renderObjectImage(self, k, x, y, img, increment):
         for i in range(k): #repeat for the number of objects, k
-            self.gameDisplay.blit(img, (x, y))
+            if isinstance(img, list):
+                self.gameDisplay.blit(img[i], (x, y))
+            else:
+                self.gameDisplay.blit(img, (x, y))
             x += increment #draw at next location
         return x
 
@@ -293,22 +306,32 @@ class Game:
         for y in range(0, setting.HEIGHT, setting.TILESIZE):
             pygame.draw.line(self.gameDisplay, setting.YELLOW, (0, y), (setting.WIDTH, y))
 
-    def draw(self, messageDict = None, fadeSurf = False, game = False, menu = False):   
-        self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
+    def renderSprite(self, player = False):
+        for s in self.allSprites:
+            if not self.debug:
+                if not isinstance(s, sprite.Player) and not player:
+                    self.gameDisplay.blit(s.image, self.camera.apply(s))
+                if player and isinstance(s, sprite.Player):
+                    self.gameDisplay.blit(s.image, self.camera.apply(s))
+            else:
+                pygame.draw.rect(self.gameDisplay, setting.WHITE, self.camera.apply_rect(s.rect), 2)
+
+    def draw(self, messageDict = None, fadeSurf = False, game = False, menu = False):  
+        if self.debug:
+            self.gameDisplay.fill(setting.BLACK)
+        else:
+            self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))    
         self.fadeSurface.fill(setting.BLACK)
         self.fadeSurface.set_alpha(150)
-    
-        for s in self.allSprites:
-            if not isinstance(s, sprite.Player):
-                self.gameDisplay.blit(s.image, self.camera.apply(s)) #apply camera so locations are expressive      
-            pygame.draw.rect(self.gameDisplay, setting.BLUE, self.camera.apply_rect(s.rect), 2)
-                   
-        for s in self.allSprites:
-            if isinstance(s, sprite.Player):
-                self.gameDisplay.blit(s.image, self.camera.apply(s))
-                pygame.draw.rect(self.gameDisplay, setting.BLUE, self.camera.apply_rect(s.hit_rect), 2)
 
-        self.draw_grid()
+        self.renderSprite()
+        self.renderSprite(True)
+
+        if self.debug:
+            for s in self.collisionSprites:    
+                pygame.draw.rect(self.gameDisplay, setting.WHITE, self.camera.apply_rect(s.rect), 2)
+                self.draw_grid()
+        
         if fadeSurf: self.gameDisplay.blit(self.fadeSurface, (0, 0))
         if menu: self.gameDisplay.blit(self.titleImage, (0, 0))
         if messageDict != None: #if there are messages to write
@@ -317,7 +340,7 @@ class Game:
 
         if game:
             self.renderObjectImage(self.player.lives, 10, setting.HEIGHT - 74, self.heartImage, 74)
-            self.renderObjectImage(self.player.litter, setting.WIDTH - 74, setting.HEIGHT - 74, self.litterImages[2], -74)
+            self.renderObjectImage(len(self.player.litterHit), setting.WIDTH - 74, setting.HEIGHT - 74, self.player.litterHit, -74)
         pygame.display.update()
 
 if __name__ == "__main__":

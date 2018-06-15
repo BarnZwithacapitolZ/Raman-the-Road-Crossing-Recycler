@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 import settings as setting
 from mapConfig import collide_hit_rect
 vec = pygame.math.Vector2
@@ -25,12 +26,24 @@ def collide_with_walls(sprite, group, direction):
                sprite.vel.y = 0
                sprite.hit_rect.centery = sprite.pos.y
 
+class Spritesheet:
+    def __init__(self, filename):
+        self.spritesheet = pygame.image.load(filename).convert_alpha()
+
+    def get_image(self, x, y, w, h):
+        image = pygame.Surface((w, h))
+        image.blit(self.spritesheet, (0, 0), (x, y, w, h))
+        image.set_colorkey(setting.SPRITESHEETCOLORKEY)
+        return image.convert()
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.allSprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = self.game.playerImage     
+        self.loadImages()
+        self.image = self.walkDown[0]   
         self.rect = self.image.get_rect()
         self.hit_rect = pygame.Rect(0, 0, 62, 103)
         self.hit_rect.center = self.rect.center
@@ -40,12 +53,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = 0
         self.lives = game.lives
-        self.litter = 0
+        self.litterHit = []
+        self.dis = 0
 
     def getKeys(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            self.acc = vec(setting.PLAYERSPEED, 0).rotate(-self.rot) #move towards mouse
+        if self.dis > 30:
+            speed = self.dis * setting.PLAYERSPEEDGAIN if (self.dis * setting.PLAYERSPEEDGAIN) < setting.PLAYERSPEED else setting.PLAYERSPEED
+            self.acc = vec(speed, 0).rotate(-self.rot) #move towards mouse
+            print(self.acc)
 
     def update(self):
         self.acc = (0, 0) #prevent infinate movement
@@ -54,20 +70,21 @@ class Player(pygame.sprite.Sprite):
         mx -= self.game.camera.x
         my -= self.game.camera.y
         self.rot = ((mx, my) - self.pos).angle_to(vec(1, 0))
-        
+        self.dis = math.sqrt((self.hit_rect.centerx - mx) ** 2 + (self.hit_rect.centery - my) ** 2)
+
         #rotate sprite relative to mouse
         if self.rot > -110 and self.rot < -70:
-            self.image = self.game.playerImage
+            self.image = self.walkDown[0]
         elif self.rot > -70 and self.rot < 10:
-            self.image = pygame.transform.flip(self.game.playerRotate, True, False)
+            self.image = pygame.transform.flip(self.walkDownLeft[0], True, False)
         elif self.rot > 10 and self.rot < 80:
-            self.image = self.game.playerRotate1
+            self.image = self.walkUpRight[0]
         elif self.rot > 80 and self.rot < 110:
-            self.image = self.game.playerFlip
+            self.image = self.walkUp[0]
         elif self.rot > 110 and self.rot < 170:
-            self.image = pygame.transform.flip(self.game.playerRotate1, True, False)
+            self.image = pygame.transform.flip(self.walkUpRight[0], True, False)
         else:
-            self.image = self.game.playerRotate
+            self.image = self.walkDownLeft[0]
     
         self.rect = self.image.get_rect() #resize (if needed)
         self.rect.center = self.pos      
@@ -82,6 +99,13 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = self.hit_rect.center
 
         #print(self.rot, self.acc, self.vel, self.pos)
+
+    def loadImages(self):
+        self.walkDown = [self.game.spritesheetPlayer.get_image(0, 0, 64, 105)]
+        self.walkUp = [self.game.spritesheetPlayer.get_image(128, 0, 64, 105)]
+        self.walkDownLeft = [self.game.spritesheetPlayer.get_image(64, 0, 64, 105)]
+        self.walkUpRight = [self.game.spritesheetPlayer.get_image(192, 0, 64, 105)]
+
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, game, x, y, w, h):
@@ -107,7 +131,7 @@ class Bin(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.allSprites, game.collisionSprites
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = game.recycleImage
+        self.image = game.binImage
         self.rect = self.image.get_rect()
         self.rect.height = self.rect.height / 2
         self.rect.x = x
@@ -121,6 +145,7 @@ class Litter(pygame.sprite.Sprite):
         selection = random.randint(0, len(game.litterImages) - 1)
         self.image = game.litterImages[selection]
         self.rect = self.image.get_rect()
+        self.rect.height = self.rect.height / 2
         self.rect.x = x
         self.rect.y = y
 
