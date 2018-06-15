@@ -169,7 +169,8 @@ class Game:
         now = pygame.time.get_ticks()
         self.timer -= self.dt
 
-        hits = pygame.sprite.spritecollide(self.player, self.vehicleSprites, False)
+        hits = pygame.sprite.spritecollide(self.player, self.vehicleSprites, False, maps.collide_hit_rect)
+        print(hits)
         if self.timer < 0 or hits:
             # Run out of time
             self.lives -= 1
@@ -286,14 +287,28 @@ class Game:
                 break
         self.fade_screen(background, 50, 5) #when complete, fade screen
 
+    def draw_grid(self):
+        for x in range(0, setting.WIDTH, setting.TILESIZE):
+            pygame.draw.line(self.gameDisplay, setting.YELLOW, (x, 0), (x, setting.HEIGHT))
+        for y in range(0, setting.HEIGHT, setting.TILESIZE):
+            pygame.draw.line(self.gameDisplay, setting.YELLOW, (0, y), (setting.WIDTH, y))
+
     def draw(self, messageDict = None, fadeSurf = False, game = False, menu = False):   
         self.gameDisplay.blit(self.mapImg, self.camera.apply_rect(self.mapRect))   
         self.fadeSurface.fill(setting.BLACK)
         self.fadeSurface.set_alpha(150)
     
         for s in self.allSprites:
-            self.gameDisplay.blit(s.image, self.camera.apply(s)) #apply camera so locations are expressive
+            if not isinstance(s, sprite.Player):
+                self.gameDisplay.blit(s.image, self.camera.apply(s)) #apply camera so locations are expressive      
+            pygame.draw.rect(self.gameDisplay, setting.BLUE, self.camera.apply_rect(s.rect), 2)
+                   
+        for s in self.allSprites:
+            if isinstance(s, sprite.Player):
+                self.gameDisplay.blit(s.image, self.camera.apply(s))
+                pygame.draw.rect(self.gameDisplay, setting.BLUE, self.camera.apply_rect(s.hit_rect), 2)
 
+        self.draw_grid()
         if fadeSurf: self.gameDisplay.blit(self.fadeSurface, (0, 0))
         if menu: self.gameDisplay.blit(self.titleImage, (0, 0))
         if messageDict != None: #if there are messages to write

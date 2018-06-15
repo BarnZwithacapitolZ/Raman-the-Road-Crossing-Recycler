@@ -109,6 +109,7 @@ class Bin(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = game.recycleImage
         self.rect = self.image.get_rect()
+        self.rect.height = self.rect.height / 2
         self.rect.x = x
         self.rect.y = y
 
@@ -126,7 +127,7 @@ class Litter(pygame.sprite.Sprite):
 
 class Vehicle(pygame.sprite.Sprite):
     def __init__(self, game, x, y, direction):
-        self.groups = game.allSprites, game.collisionSprites, game.vehicleSprites
+        self.groups = game.allSprites, game.vehicleSprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.direction = direction
@@ -139,6 +140,7 @@ class Vehicle(pygame.sprite.Sprite):
            self.speed = -self.speed
            
         self.rect = self.image.get_rect()
+        self.rect.height = self.rect.height / 2
         self.x = x #for spawning new
         self.rect.x = x
         self.rect.y = y
